@@ -41,8 +41,8 @@ import Metalsmith from "metalsmith";
 import ordered from "ordered-read-streams";
 import path from "path";
 import postcss from "gulp-postcss";
-import postcssLib from "postcss";
 import postcssDiscardComments from "postcss-discard-comments";
+import postcssLib from "postcss";
 import { preprocess } from "./external/builder/builder.mjs";
 import relative from "metalsmith-html-relative";
 import rename from "gulp-rename";
@@ -50,6 +50,8 @@ import replace from "gulp-replace";
 import stream from "stream";
 import TerserPlugin from "terser-webpack-plugin";
 import Vinyl from "vinyl";
+import { build as viteBuild, createServer as viteCreateServer } from "vite";
+import vuePlugin from "@vitejs/plugin-vue";
 import webpack2 from "webpack";
 import webpackStream from "webpack-stream";
 import zip from "gulp-zip";
@@ -77,6 +79,7 @@ const JSDOC_BUILD_DIR = BUILD_DIR + "jsdoc/";
 const GH_PAGES_DIR = BUILD_DIR + "gh-pages/";
 const DIST_DIR = BUILD_DIR + "dist/";
 const TYPES_DIR = BUILD_DIR + "types/";
+const VUE_COMPONENTS_DIR = BUILD_DIR + "vue-components/";
 const TMP_DIR = BUILD_DIR + "tmp/";
 const PREFSTEST_DIR = BUILD_DIR + "prefstest/";
 const TYPESTEST_DIR = BUILD_DIR + "typestest/";
@@ -587,6 +590,22 @@ function createElementBundle(defines, options) {
   return gulp
     .src("./element/pdf-viewer-element.js", { encoding: false })
     .pipe(webpack2Stream(elementFileConfig));
+}
+
+function createVueAppBundle(defines, options) {
+  const vueAppFileConfig = createWebpackConfig(
+    defines,
+    {
+      filename: "pdf-viewer-app.mjs",
+      library: {
+        type: "module",
+      },
+    },
+    options
+  );
+  return gulp
+    .src("./vue-components/pdf_viewer_app.js", { encoding: false })
+    .pipe(webpack2Stream(vueAppFileConfig));
 }
 
 function createGVWebBundle(defines, options) {
@@ -1676,6 +1695,62 @@ gulp.task(
       return buildElement(defines, ELEMENT_DIR);
     }
   )
+);
+
+// Builds the application factory used by the Vue 3 wrapper component (see
+// `vue-components/pdf_viewer_app.js`); unlike the Custom Element bundle it
+// contains no Web Components / Custom Element machinery.
+function buildVueApp() {
+  console.log("\n### Creating Vue app bundle");
+  const defines = { ...DEFINES, GENERIC: true };
+
+  return createVueAppBundle(defines, {
+    // The bundle must be self-contained, hence the PDF.js library itself is
+    // included directly instead of being loaded via the `globalThis.pdfjsLib`
+    // that the `web/pdfjs.js` shim uses for the generic viewer.
+    aliasOverrides: { "pdfjs-lib": path.join(__dirname, "src/pdf.js") },
+  }).pipe(gulp.dest(VUE_COMPONENTS_DIR));
+}
+
+// Builds the Vue 3 wrapper component and the example demo for the
+// embeddable viewer; see `vue-components/` for the sources. The `element`
+// build must run first, since the component bundles its output.
+gulp.task(
+  "vue-components",
+  gulp.series("element", buildVueApp, async function buildVueComponents() {
+    console.log("\n### Creating vue-components");
+    const vueLibDir = path.join(__dirname, VUE_COMPONENTS_DIR, "lib");
+    const vueDemoDir = path.join(__dirname, VUE_COMPONENTS_DIR, "demo");
+
+    await viteBuild({
+      root: path.join(__dirname, "vue-components"),
+      logLevel: "warn",
+      plugins: [vuePlugin()],
+      build: {
+        outDir: vueLibDir,
+        emptyOutDir: true,
+        lib: {
+          entry: "PdfViewerElement.vue",
+          formats: ["es"],
+          fileName: () => "pdf-viewer-element-vue.mjs",
+          cssFileName: "pdf-viewer-element-vue",
+        },
+      },
+    });
+    await viteBuild({
+      root: path.join(__dirname, "vue-components", "example"),
+      logLevel: "warn",
+      plugins: [vuePlugin()],
+      base: "./",
+      build: {
+        outDir: vueDemoDir,
+        emptyOutDir: true,
+      },
+    });
+    return gulp
+      .src(ELEMENT_DIR + "**/*", { encoding: false })
+      .pipe(gulp.dest(path.join(vueDemoDir, "element")));
+  })
 );
 
 // Builds the generic production viewer that should be compatible with most
@@ -3067,6 +3142,61 @@ gulp.task(
         aliases: { "/element/": "build/generic/element/" },
       });
       server.start();
+    }
+  )
+);
+
+// Serves the Vue 3 example (`vue-components/example/`) on a Vite dev
+// server; the `/element/` URL is mapped to the `element` build output.
+gulp.task(
+  "server-vue",
+  gulp.series(
+    function ensureElementForVue(cb) {
+      if (
+        checkFile(ELEMENT_DIR + "demo.html") &&
+        checkFile(VUE_COMPONENTS_DIR + "pdf-viewer-app.mjs")
+      ) {
+        cb();
+        return;
+      }
+      console.log("\n### Building the element and the Vue app bundle first");
+      gulp.series("element", buildVueApp)(cb);
+    },
+    async function createVueServer() {
+      console.log("\n### Starting Vue example server");
+
+      let port = 8889;
+      const i = process.argv.indexOf("--port");
+      if (i >= 0 && i + 1 < process.argv.length) {
+        const p = parseInt(process.argv[i + 1], 10);
+        if (!isNaN(p)) {
+          port = p;
+        } else {
+          console.error("Invalid port number: using default (8889)");
+        }
+      }
+
+      let host;
+      const j = process.argv.indexOf("--host");
+      if (j >= 0 && j + 1 < process.argv.length) {
+        host = process.argv[j + 1];
+        if (host === "0") {
+          host = "0.0.0.0";
+        }
+      }
+
+      const server = await viteCreateServer({
+        root: path.join(__dirname, "vue-components", "example"),
+        logLevel: "info",
+        plugins: [vuePlugin()],
+        // Serve the `<pdf-viewer-element>` build output under the same
+        // `/element/` URL that the example references (see `App.vue`).
+        publicDir: path.join(__dirname, BUILD_DIR, "generic"),
+        server: { host, port, strictPort: true },
+      });
+      await server.listen();
+      server.printUrls();
+      await new Promise(() => {});
     }
   )
 );

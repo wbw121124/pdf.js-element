@@ -59,7 +59,10 @@
     "tsc-alias": "^1.9.1",
     "ttest": "^4.0.0",
     "typescript": "^6.0.3",
+    "@vitejs/plugin-vue": "^6.0.0",
     "vinyl": "^3.0.1",
+    "vite": "^7.0.0",
+    "vue": "^3.5.0",
     "webpack": "^5.109.2",
     "webpack-stream": "^7.0.0"
   },

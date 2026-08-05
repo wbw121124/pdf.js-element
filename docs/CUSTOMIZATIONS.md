@@ -230,12 +230,48 @@ VSCode Dark Plus 配色，并默认启用深色。
 `.pdfjs-element[data-ui-style="old"]` 上的变量值（构建时由 gulpfile 的
 `appendElementOldUiCSS()` 追加到 `pdf-viewer-element.css` 末尾）。
 独立查看器（generic）恒为新样式。
+
+### Vue 组件（`vue-components/`）
+
+提供了 Vue 3 封装组件 `vue-components/PdfViewerElement.vue`，为可嵌入
+查看器的**纯 Vue 实现——不使用 Web Components / 自定义元素**：
+
+- 组件通过 `pdf_viewer_app.js`（`createViewerApp()`，与
+  `element/pdf-viewer-element.js` 同源逻辑）直接创建查看器应用实例，
+  容器为普通 `div.pdfjs-element`，无需 `customElements` 支持；
+- 每个组件实例创建并挂载一个独立的查看器实例，卸载时自动销毁；
+- props 与查看器状态保持同步（`src`、`page`、`zoom` 运行中修改立即
+  生效；`ui-style` 新/旧切换同样即时生效），`lang`、`l10n-url`、
+  `worker-src`、`c-map-url`、`standard-font-data-url`、`wasm-url`、
+  `sandbox-bundle-src` 为创建时生效的资源覆盖项；
+- 查看器事件以 `pdfjs-*` 事件转发（原始数据在 `$event` 中）；
+- 通过 `ref` 暴露 `ready`、`instance` 及 `open`、`close`、`nextPage`、
+  `previousPage`、`firstPage`、`lastPage`、`gotoPage`、`zoomIn`、`zoomOut`、
+  `zoomReset`、`setZoom`、`rotateCW`、`rotateCCW`、`setUiStyle` 方法。
+
+`npx gulp vue-components` 一键打包（依次构建 element → `pdf-viewer-app.mjs`
+→ 组件库 → 演示站点）：
+
+- `build/vue-components/pdf-viewer-app.mjs` — webpack 打包的查看器应用
+  工厂（不含自定义元素机制），供组件引入；
+- `build/vue-components/lib/` — 组件库产物 `pdf-viewer-element-vue.mjs`
+  （ESM，内联了应用工厂与作用域 CSS，CSS 独立为
+  `pdf-viewer-element-vue.css`）；
+- `build/vue-components/demo/` — 完整可运行的演示站点（含
+  `element/` 查看器资源），可直接静态托管。
+
+查看器资源（worker、locale、cmaps 等）需自行托管，可参考
+`vue-components/example/` 中的示例（将 `build/generic/element/` 复制到
+public 目录即可）。
+
 ## 构建命令备忘
 
 | 场景 | 命令 |
 | --- | --- |
 | 日常验证（推荐） | `npx gulp dist` |
 | 现代浏览器版本 | `npx gulp generic` |
+| 打包 Vue 组件（库 + 演示） | `npx gulp vue-components` |
+| 启动 Vue 示例开发服务器 | `npx gulp server-vue`（默认 8889 端口，支持 `--port`/`--host`） |
 | 启动开发服务器 | `npx gulp server` |
 | 代码检查 | `npx gulp lint` |
 
