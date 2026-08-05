@@ -215,6 +215,21 @@ VSCode Dark Plus 配色，并默认启用深色。
 `web/viewer.html` 做 GENERIC 预处理后提取 `<body>` 内容，写入模板字符串。
 若 `web/viewer.html` 的标记发生变化，重新执行 `npx gulp element` 即可同步。
 
+### 新/旧 UI 样式（`ui-style` 属性）
+
+`<pdf-viewer-element>` 支持 `ui-style="new"`（默认，现代化 UI）与
+`ui-style="old"`（旧版扁平 UI）两种样式，运行中修改属性会立即生效。
+
+现代化改造（`web/viewer.css`）全部由 CSS 变量驱动，如
+`--toolbar-height`、`--toolbarButton-border-radius`、`--field-border-radius`、
+`--menu-border-radius`、`--button-transition`、`--button-focus-outline`、
+`--field-focus-box-shadow`、`--button-hover-icon-opacity`、
+`--toolbar-separator-height`、`--toolbar-separator-margin`、
+`--split-separator-height`、`--doorhanger-box-shadow`、`--page-number-width`
+等；"旧"模式仅通过 `element/pdf-viewer-element-old-ui.css` 覆盖
+`.pdfjs-element[data-ui-style="old"]` 上的变量值（构建时由 gulpfile 的
+`appendElementOldUiCSS()` 追加到 `pdf-viewer-element.css` 末尾）。
+独立查看器（generic）恒为新样式。
 ## 构建命令备忘
 
 | 场景 | 命令 |

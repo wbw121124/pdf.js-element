@@ -41,6 +41,7 @@ import Metalsmith from "metalsmith";
 import ordered from "ordered-read-streams";
 import path from "path";
 import postcss from "gulp-postcss";
+import postcssLib from "postcss";
 import postcssDiscardComments from "postcss-discard-comments";
 import { preprocess } from "./external/builder/builder.mjs";
 import relative from "metalsmith-html-relative";
@@ -1454,6 +1455,22 @@ function scopeCSSForElement() {
   };
 }
 
+// Appends the "old" (legacy) UI style of the `<pdf-viewer-element>`, which is
+// selected via the `ui-style="old"` attribute (see `element/pdf-viewer-element
+// -old-ui.css`). Since the modern UI is entirely driven by the CSS variables
+// of `web/viewer.css`, the old UI only overrides those variable values.
+function appendElementOldUiCSS() {
+  return {
+    postcssPlugin: "pdfjs-element-old-ui",
+    OnceExit(root) {
+      const css = fs
+        .readFileSync("element/pdf-viewer-element-old-ui.css")
+        .toString();
+      root.nodes.push(...postcssLib.parse(css).nodes);
+    },
+  };
+}
+
 function preprocessHTML(source, defines) {
   defines = {
     ...defines,
@@ -1625,6 +1642,7 @@ function buildElement(defines, dir) {
           discardCommentsCSS(),
           autoprefixer(AUTOPREFIXER_CONFIG),
           scopeCSSForElement(),
+          appendElementOldUiCSS(),
         ])
       )
       .pipe(rename("pdf-viewer-element.css"))

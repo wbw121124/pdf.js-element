@@ -1,0 +1,41 @@
+/* Copyright 2026 wbw121124
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* The "old" (legacy) UI style of the `<pdf-viewer-element>`, selected via the
+ * `ui-style="old"` attribute. Since the (new) modern UI is entirely driven by
+ * the CSS variables of `web/viewer.css`, the old UI only needs to override
+ * the variable values on the instance root; this stylesheet is appended to
+ * the scoped `pdf-viewer-element.css` by `buildElement` in the gulpfile. */
+.pdfjs-element[data-ui-style="old"] {
+  --toolbar-height: 32px;
+  --toolbar-horizontal-padding: 1px;
+  --toolbar-vertical-padding: 2px;
+  --toolbarButton-border-radius: 2px;
+  --toolbar-icon-opacity: 0.7;
+  --button-hover-icon-opacity: 0.7;
+  --button-transition: none;
+  --button-active-bg: transparent;
+  --button-focus-outline: none;
+  --toolbar-separator-height: 80%;
+  --toolbar-separator-margin: 2px;
+  --split-separator-height: 62%;
+  --field-border-radius: 2px;
+  --field-focus-box-shadow: none;
+  --menu-border-radius: 2px;
+  --doorhanger-box-shadow:
+    0 1px 5px var(--doorhanger-border-color),
+    0 0 0 1px var(--doorhanger-border-color);
+  --page-number-width: 40px;
+}

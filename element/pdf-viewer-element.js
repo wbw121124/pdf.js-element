@@ -80,6 +80,10 @@ const FORWARDED_EVENTS = [
  *    against the URL of the page). Note that the document can only use a
  *    single locale directory; the first element on the page that specifies
  *    this attribute wins.
+ *  - `ui-style`: the UI style of the viewer, either `"new"` (the default,
+ *    i.e. the modern UI) or `"old"` (the legacy flat UI); the modern UI is
+ *    entirely driven by CSS variables, so the "old" style only overrides
+ *    those variable values (see `element/pdf-viewer-element-old-ui.css`).
  *
  * Methods (mirroring the `PDFViewerApplication` API): `open`, `close`,
  * `nextPage`, `previousPage`, `firstPage`, `lastPage`, `gotoPage`,
@@ -99,7 +103,7 @@ const FORWARDED_EVENTS = [
  */
 class PDFViewerElement extends HTMLElement {
   static get observedAttributes() {
-    return ["src", "page", "zoom"];
+    return ["src", "page", "zoom", "ui-style"];
   }
 
   #app = null;
@@ -166,6 +170,23 @@ class PDFViewerElement extends HTMLElement {
           this.setZoom(newValue);
         }
         break;
+      case "ui-style":
+        this.#applyUiStyle();
+        break;
+    }
+  }
+
+  /**
+   * Toggles the `ui-style` of the viewer, i.e. `data-ui-style="old"` is set
+   * on the instance root (see `element/pdf-viewer-element-old-ui.css`) when
+   * the `ui-style="old"` attribute is present, otherwise the (default)
+   * modern UI applies.
+   */
+  #applyUiStyle() {
+    if (this.getAttribute("ui-style") === "old") {
+      this.#container?.setAttribute("data-ui-style", "old");
+    } else {
+      this.#container?.removeAttribute("data-ui-style");
     }
   }
 
@@ -183,6 +204,8 @@ class PDFViewerElement extends HTMLElement {
     const container = document.createElement("div");
     container.className = "pdfjs-element";
     this.append(container);
+    this.#container = container;
+    this.#applyUiStyle();
     // The markup comes from the bundled (static) `viewer_template.js` module,
     // and is hence *not* user-controlled.
     // eslint-disable-next-line no-unsanitized/property

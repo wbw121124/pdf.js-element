@@ -33,12 +33,20 @@
   --sidebar-transition-duration: 200ms;
   --sidebar-transition-timing-function: ease;
 
-  --toolbar-height: 32px;
-  --toolbar-horizontal-padding: 1px;
-  --toolbar-vertical-padding: 2px;
+  --toolbar-height: 40px;
+  --toolbar-horizontal-padding: 6px;
+  --toolbar-vertical-padding: 4px;
   --icon-size: 16px;
 
-  --toolbar-icon-opacity: 0.7;
+  --toolbarButton-border-radius: 6px;
+  --toolbar-icon-opacity: 0.85;
+  --button-hover-icon-opacity: 1;
+  --button-transition: background-color 120ms ease, color 120ms ease;
+  --button-active-bg: color-mix(in srgb, currentColor 26%, transparent);
+  --button-focus-outline: 2px solid #0a84ff;
+  --toolbar-separator-height: 55%;
+  --toolbar-separator-margin: 5px;
+  --split-separator-height: 50%;
   --doorhanger-icon-opacity: 0.9;
   --doorhanger-height: 8px;
 
@@ -75,12 +83,19 @@
   --toggled-hover-btn-outline: none;
   --dropdown-btn-bg-color: light-dark(rgb(215 215 219), #3c3c3c);
   --dropdown-btn-border: none;
+  --page-number-width: 44px;
   --separator-color: rgb(0 0 0 / 0.3);
   --field-color: light-dark(rgb(6 6 6), #ccc);
   --field-bg-color: light-dark(rgb(255 255 255), #333);
   --field-border-color: light-dark(rgb(187 187 188), #3f3f3f);
+  --field-border-radius: 6px;
+  --field-focus-box-shadow: 0 0 0 2px color-mix(in srgb, #0a84ff 25%, transparent);
   --doorhanger-bg-color: light-dark(rgb(255 255 255), #252526);
   --doorhanger-border-color: light-dark(rgb(12 12 13 / 0.2), #454545);
+  --menu-border-radius: 6px;
+  --doorhanger-box-shadow:
+    0 4px 16px rgb(0 0 0 / 0.25),
+    0 0 0 1px var(--doorhanger-border-color);
   --doorhanger-hover-color: light-dark(rgb(12 12 13), #d4d4d4);
   --doorhanger-separator-color: light-dark(rgb(222 222 222), #454545);
 
@@ -364,10 +379,8 @@ body {
 
 .doorHanger,
 .doorHangerRight {
-  border-radius: 2px;
-  box-shadow:
-    0 1px 5px var(--doorhanger-border-color),
-    0 0 0 1px var(--doorhanger-border-color);
+  border-radius: var(--menu-border-radius);
+  box-shadow: var(--doorhanger-box-shadow);
   border: var(--doorhanger-border-color-whcm);
   background-color: var(--doorhanger-bg-color);
   inset-block-start: calc(100% + var(--doorhanger-height) - 2px);
@@ -424,7 +437,7 @@ body {
 .splitToolbarButtonSeparator {
   float: inline-start;
   width: 0;
-  height: 62%;
+  height: var(--split-separator-height);
   border-left: 1px solid var(--separator-color);
   border-right: none;
 }
@@ -497,24 +510,11 @@ body {
   mask-image: var(--toolbarButton-search-icon);
 }
 
-.pdfSidebarNotification::after {
-  position: absolute;
-  display: inline-block;
-  top: 2px;
-  inset-inline-end: 2px;
-  /* Create a filled circle, with a diameter of 9 pixels, using only CSS: */
-  content: "";
-  background-color: rgb(112 219 85);
-  height: 9px;
-  width: 9px;
-  border-radius: 50%;
-}
-
 .verticalToolbarSeparator {
   display: block;
-  margin-inline: 2px;
+  margin-inline: var(--toolbar-separator-margin);
   width: 0;
-  height: 80%;
+  height: var(--toolbar-separator-height);
   border-left: 1px solid var(--separator-color);
   border-right: none;
   box-sizing: border-box;
@@ -555,7 +555,7 @@ body {
 .toolbarField {
   padding: 4px 7px;
   margin: 3px 0;
-  border-radius: 2px;
+  border-radius: var(--field-border-radius);
   background-color: var(--field-bg-color);
   background-clip: padding-box;
   border: 1px solid var(--field-border-color);
@@ -564,16 +564,18 @@ body {
   font-size: 12px;
   line-height: 16px;
   outline: none;
+  transition: var(--button-transition);
 
   &:focus {
     border-color: #0a84ff;
+    box-shadow: var(--field-focus-box-shadow);
   }
 }
 
 #pageNumber {
   -moz-appearance: textfield; /* hides the spinner in moz */
   text-align: end;
-  width: 40px;
+  width: var(--page-number-width);
   background-size: 0 0;
   transition-property: none;
 
@@ -757,12 +759,13 @@ dialog :link {
   border: none;
   color: var(--main-color);
   outline: none;
-  border-radius: 2px;
+  border-radius: var(--toolbarButton-border-radius);
   box-sizing: border-box;
   font: message-box;
   flex: none;
   position: relative;
   padding: 0;
+  transition: var(--button-transition);
 
   > span {
     display: inline-block;
@@ -804,7 +807,17 @@ dialog :link {
 
     &::before {
       background-color: var(--toolbar-icon-hover-bg-color);
+      opacity: var(--button-hover-icon-opacity);
     }
+  }
+
+  &:focus-visible {
+    outline: var(--button-focus-outline);
+    outline-offset: -2px;
+  }
+
+  &:active {
+    background-color: var(--button-active-bg);
   }
 
   &:is([disabled="disabled"], [disabled]) {
@@ -1278,7 +1291,7 @@ dialog :link {
   padding: 0;
   background-color: var(--dropdown-btn-bg-color);
   border: var(--dropdown-btn-border);
-  border-radius: 2px;
+  border-radius: var(--field-border-radius);
   color: var(--main-color);
   font-size: 12px;
   line-height: 14px;
@@ -1286,9 +1299,15 @@ dialog :link {
   cursor: default;
   box-sizing: border-box;
   outline: none;
+  transition: var(--button-transition);
 
   &:hover {
     background-color: var(--button-hover-color);
+  }
+
+  &:has(> select:focus-visible) {
+    outline: var(--button-focus-outline);
+    outline-offset: -2px;
   }
 
   > select {
