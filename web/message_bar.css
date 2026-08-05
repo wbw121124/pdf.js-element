@@ -21,15 +21,15 @@
   --message-bar-close-button-border: none;
   --message-bar-close-button-hover-bg-color: var(
     --button-background-color-hover,
-    light-dark(rgb(21 20 26 / 0.14), rgb(251 251 254 / 0.14))
+    light-dark(rgb(21 20 26 / 0.14), #4d4d4d)
   );
   --message-bar-close-button-active-bg-color: var(
     --button-background-color-active,
-    light-dark(rgb(21 20 26 / 0.21), rgb(251 251 254 / 0.21))
+    light-dark(rgb(21 20 26 / 0.21), #5a5a5a)
   );
   --message-bar-close-button-focus-bg-color: var(
     --button-background-color,
-    light-dark(rgb(21 20 26 / 0.07), rgb(251 251 254 / 0.07))
+    light-dark(rgb(21 20 26 / 0.07), #3c3c3c)
   );
 
   @media screen and (forced-colors: active) {
@@ -151,13 +151,10 @@
 
 #editorUndoBar {
   --message-bar-icon: url(images/messageBar_info.svg);
-  --message-bar-icon-color: light-dark(#0060df, #73a7f3);
+  --message-bar-icon-color: light-dark(#0060df, #3794ff);
   --message-bar-bg-color: light-dark(#deeafc, #003070);
   --message-bar-fg-color: var(--text-primary-color);
-  --message-bar-border-color: light-dark(
-    rgb(0 0 0 / 0.08),
-    rgb(255 255 255 / 0.08)
-  );
+  --message-bar-border-color: light-dark(rgb(0 0 0 / 0.08), #2a2d2e);
 
   @media screen and (forced-colors: active) {
     --message-bar-icon-color: CanvasText;
@@ -187,7 +184,7 @@
     margin-inline-start: 8px;
     /* The generic secondary border is the same translucent wash as its fill,
        which disappears on the tinted bar, so keep an explicit accent edge. */
-    border-color: var(--color-accent-primary, light-dark(#0060df, #0df));
+    border-color: var(--color-accent-primary, light-dark(#0060df, #3794ff));
   }
 
   > div {

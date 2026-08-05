@@ -80,7 +80,6 @@ class PDFThumbnailView extends RenderableView {
     maxCanvasPixels,
     maxCanvasDim,
     pageColors,
-    enableSplitMerge = false,
   }) {
     super();
     this.id = id;
@@ -123,16 +122,6 @@ class PDFThumbnailView extends RenderableView {
     const image = (this.image = document.createElement("img"));
     imageContainer.append(image);
 
-    if (enableSplitMerge) {
-      const checkbox = (this.checkbox = document.createElement("input"));
-      checkbox.type = "checkbox";
-      checkbox.tabIndex = -1;
-      checkbox.setAttribute("data-l10n-id", "pdfjs-thumb-page-checkbox1");
-      checkbox.setAttribute("data-l10n-args", this.#getPageL10nArgs());
-      thumbnailContainer.append(checkbox);
-      this.pasteButton = null;
-    }
-
     this.#updateDims();
 
     container.append(thumbnailContainer);
@@ -150,7 +139,6 @@ class PDFThumbnailView extends RenderableView {
       maxCanvasPixels: this.maxCanvasPixels,
       maxCanvasDim: this.maxCanvasDim,
       pageColors: this.pageColors,
-      enableSplitMerge: !!this.checkbox,
     });
     const { imageContainer } = this;
     if (!imageContainer.classList.contains("missingThumbnailImage")) {
@@ -158,53 +146,6 @@ class PDFThumbnailView extends RenderableView {
       thumbnailView.imageContainer.classList.remove("missingThumbnailImage");
     }
     return thumbnailView;
-  }
-
-  addPasteButton(pasteCallback) {
-    if (this.pasteButton) {
-      return;
-    }
-    const pasteButton = (this.pasteButton = document.createElement("button"));
-    pasteButton.classList.add("thumbnailPasteButton", "viewsManagerButton");
-    pasteButton.tabIndex = 0;
-    pasteButton.setAttribute(
-      "data-l10n-id",
-      "pdfjs-views-manager-paste-button-after"
-    );
-    pasteButton.setAttribute("data-l10n-args", this.#getPageL10nArgs());
-    const span = document.createElement("span");
-    span.setAttribute("data-l10n-id", "pdfjs-views-manager-paste-button-label");
-    pasteButton.append(span);
-    pasteButton.addEventListener("click", () => {
-      pasteCallback(this.id);
-    });
-    if (this.id === 1) {
-      const prevPasteButton = (this.prevPasteButton =
-        pasteButton.cloneNode(true));
-      prevPasteButton.setAttribute(
-        "data-l10n-id",
-        "pdfjs-views-manager-paste-button-before"
-      );
-      prevPasteButton.addEventListener("click", () => {
-        pasteCallback(0);
-      });
-      this.imageContainer.before(prevPasteButton);
-    }
-
-    this.imageContainer.after(pasteButton);
-  }
-
-  removePasteButton() {
-    this.pasteButton?.remove();
-    this.pasteButton = null;
-    this.prevPasteButton?.remove();
-    this.prevPasteButton = null;
-  }
-
-  toggleSelected(isSelected) {
-    if (this.checkbox) {
-      this.checkbox.checked = isSelected;
-    }
   }
 
   updateId(newId) {
@@ -282,15 +223,9 @@ class PDFThumbnailView extends RenderableView {
     if (isCurrent) {
       imageContainer.ariaCurrent = "page";
       imageContainer.tabIndex = 0;
-      if (this.checkbox) {
-        this.checkbox.tabIndex = 0;
-      }
     } else {
       imageContainer.ariaCurrent = false;
       imageContainer.tabIndex = -1;
-      if (this.checkbox) {
-        this.checkbox.tabIndex = -1;
-      }
     }
   }
 
@@ -549,7 +484,6 @@ class PDFThumbnailView extends RenderableView {
       this.#getPageL10nArgs(true)
     );
     this.image.setAttribute("data-l10n-args", this.#getPageL10nArgs());
-    this.checkbox?.setAttribute("data-l10n-args", this.#getPageL10nArgs());
   }
 }
 

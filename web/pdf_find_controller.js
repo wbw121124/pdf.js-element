@@ -423,10 +423,6 @@ class PDFFindController {
 
   #visitedPagesCount = 0;
 
-  #copiedPageData = null;
-
-  #savedPageData = null;
-
   /**
    * @param {PDFFindControllerOptions} options
    */
@@ -450,7 +446,6 @@ class PDFFindController {
     this.#reset();
     eventBus.on("find", this.#onFind.bind(this), internalOpt);
     eventBus.on("findbarclose", this.#onFindBarClose.bind(this), internalOpt);
-    eventBus.on("pagesedited", this.#onPagesEdited.bind(this), internalOpt);
   }
 
   get highlightMatches() {
@@ -610,7 +605,6 @@ class PDFFindController {
     this._dirtyMatch = false;
     clearTimeout(this._findTimeout);
     this._findTimeout = null;
-    this.#copiedPageData = null;
 
     this._firstPageCapability = Promise.withResolvers();
   }
@@ -1092,94 +1086,6 @@ class PDFFindController {
       this._scrollMatches = true;
 
       this.#updatePage(this._selected.pageIdx);
-    }
-  }
-
-  #onPagesEdited({ pagesMapper, type, pageNumbers }) {
-    if (this._extractTextPromises.length === 0) {
-      return;
-    }
-
-    if (type === "copy") {
-      const promises = new Map();
-      const contents = new Map();
-      const diffs = new Map();
-      const diacritics = new Map();
-      for (const pageNum of pageNumbers) {
-        promises.set(pageNum, this._extractTextPromises[pageNum - 1]);
-        contents.set(pageNum, this._pageContents[pageNum - 1]);
-        diffs.set(pageNum, this._pageDiffs[pageNum - 1]);
-        diacritics.set(pageNum, this._hasDiacritics[pageNum - 1]);
-      }
-      this.#copiedPageData = { promises, contents, diffs, diacritics };
-      return;
-    }
-
-    if (type === "cancelCopy") {
-      this.#copiedPageData = null;
-      return;
-    }
-
-    if (type === "delete") {
-      this.#savedPageData = {
-        promises: this._extractTextPromises,
-        contents: this._pageContents,
-        diffs: this._pageDiffs,
-        diacritics: this._hasDiacritics,
-      };
-    }
-
-    if (type === "cancelDelete") {
-      this._extractTextPromises = this.#savedPageData.promises;
-      this._pageContents = this.#savedPageData.contents;
-      this._pageDiffs = this.#savedPageData.diffs;
-      this._hasDiacritics = this.#savedPageData.diacritics;
-      return;
-    }
-
-    if (type === "cleanSavedData") {
-      this.#savedPageData = null;
-      return;
-    }
-
-    // Cancel any pending find timeout and clear a pending resume page index
-    // synchronously. Calling #onFindBarClose() here would schedule its cleanup
-    // asynchronously.
-    if (this._findTimeout) {
-      clearTimeout(this._findTimeout);
-      this._findTimeout = null;
-    }
-    this._resumePageIdx = null;
-    this._dirtyMatch = true;
-    const prevPromises = this._extractTextPromises;
-    const prevContents = this._pageContents;
-    const prevDiffs = this._pageDiffs;
-    const prevDiacritics = this._hasDiacritics;
-    const extractTextPromises = (this._extractTextPromises = []);
-    const pageContents = (this._pageContents = []);
-    const pageDiffs = (this._pageDiffs = []);
-    const hasDiacritics = (this._hasDiacritics = []);
-    for (let i = 1, ii = pagesMapper.pagesNumber; i <= ii; i++) {
-      const prevPageNumber = pagesMapper.getPrevPageNumber(i);
-      if (prevPageNumber < 0) {
-        const src = -prevPageNumber;
-        extractTextPromises.push(
-          this.#copiedPageData?.promises.get(src) || Promise.resolve()
-        );
-        pageContents.push(this.#copiedPageData?.contents.get(src) ?? "");
-        pageDiffs.push(this.#copiedPageData?.diffs.get(src) ?? null);
-        hasDiacritics.push(this.#copiedPageData?.diacritics.get(src) ?? false);
-        continue;
-      }
-      extractTextPromises.push(
-        prevPromises[prevPageNumber - 1] || Promise.resolve()
-      );
-      pageContents.push(prevContents[prevPageNumber - 1] ?? "");
-      pageDiffs.push(prevDiffs[prevPageNumber - 1] ?? null);
-      hasDiacritics.push(prevDiacritics[prevPageNumber - 1] ?? false);
-    }
-    if (this.#state) {
-      this.#nextMatch();
     }
   }
 

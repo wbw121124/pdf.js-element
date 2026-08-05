@@ -62,6 +62,7 @@ const TEST_DIR = "test/";
 const BASELINE_DIR = BUILD_DIR + "baseline/";
 const MOZCENTRAL_BASELINE_DIR = BUILD_DIR + "mozcentral.baseline/";
 const GENERIC_DIR = BUILD_DIR + "generic/";
+const ELEMENT_DIR = BUILD_DIR + "generic/element/";
 const GENERIC_LEGACY_DIR = BUILD_DIR + "generic-legacy/";
 const COMPONENTS_DIR = BUILD_DIR + "components/";
 const COMPONENTS_LEGACY_DIR = BUILD_DIR + "components-legacy/";
@@ -286,6 +287,7 @@ function createWebpackConfig(
     disableVersionInfo = false,
     disableSourceMaps = false,
     disableLicenseHeader = false,
+    aliasOverrides = null,
   } = {}
 ) {
   const versionInfo = !disableVersionInfo
@@ -383,6 +385,9 @@ function createWebpackConfig(
   });
 
   const alias = createWebpackAlias(bundleDefines);
+  if (aliasOverrides) {
+    Object.assign(alias, aliasOverrides);
+  }
   const experiments = isModule ? { outputModule: true } : undefined;
 
   // Required to expose e.g., the `window` object.
@@ -565,6 +570,22 @@ function createWebBundle(defines, options) {
   return gulp
     .src("./web/viewer.js", { encoding: false })
     .pipe(webpack2Stream(viewerFileConfig));
+}
+
+function createElementBundle(defines, options) {
+  const elementFileConfig = createWebpackConfig(
+    defines,
+    {
+      filename: "pdf-viewer-element.mjs",
+      library: {
+        type: "module",
+      },
+    },
+    options
+  );
+  return gulp
+    .src("./element/pdf-viewer-element.js", { encoding: false })
+    .pipe(webpack2Stream(elementFileConfig));
 }
 
 function createGVWebBundle(defines, options) {
@@ -1336,6 +1357,103 @@ function discardCommentsCSS() {
   return postcssDiscardComments({ remove });
 }
 
+// PostCSS plugin used to "scope" the viewer CSS, so that it can be used by
+// the `<pdf-viewer-element>` Custom Element (which supports several
+// instances on the same page):
+//  - The `:root`, `html` and `body` selectors are replaced by the
+//    `.pdfjs-element` class, i.e. the root element of each instance.
+//  - All id selectors (`#foo`) are replaced by class selectors (`.foo`),
+//    since the DOM of each instance uses instance-specific (prefixed) ids;
+//    the Custom Element implementation adds the corresponding classes.
+//    To preserve the specificity of the (former) id selectors, flat rules
+//    are additionally prefixed with the `.pdfjs-element` root selector.
+//  - The (viewport based) `@media (max-width: Npx)` queries are replaced by
+//    `.pdfjs-element.pdfjs-element-narrow-N` class rules, which the Custom
+//    Element toggles (via a ResizeObserver) based on the *element* width.
+//  - When the views manager is opened, the page area keeps its full width
+//    (i.e. the sidebar overlays the page, instead of pushing it).
+function scopeCSSForElement() {
+  const rootSelector = ".pdfjs-element";
+  return {
+    postcssPlugin: "pdfjs-element-scope",
+    AtRule(atRule) {
+      if (atRule.name !== "media") {
+        return;
+      }
+      const match = atRule.params.match(/^all and \(max-width: (\d+)px\)$/);
+      if (!match) {
+        return;
+      }
+      if (match[1] === "560") {
+        // The zoom select (`.scaleSelectContainer`) is the only rule in the
+        // 560px breakpoint, and it must remain visible in the element
+        // context even at narrow widths, hence the whole breakpoint is
+        // dropped here.
+        atRule.remove();
+        return;
+      }
+      for (const child of atRule.nodes) {
+        if (child.type === "rule") {
+          child.selectors = child.selector
+            .split(",")
+            .map(part =>
+              part.replace(
+                /^(&\s*)?/,
+                `$1${rootSelector}.pdfjs-element-narrow-${match[1]} `
+              )
+            );
+        }
+      }
+      atRule.replaceWith(...atRule.nodes);
+    },
+    Rule(rule) {
+      const selector = rule.selector;
+      const isRootSelector = /(?:^|,)\s*(?::root|html|body)\b/.test(selector);
+      if (!selector.includes("#") && !isRootSelector) {
+        return;
+      }
+      // Only the top-most rule of a (nested) chain is prefixed with the
+      // root selector, since nested rules (with `&`) are expanded against
+      // their ancestors by the browser; this preserves the specificity of
+      // the former id selectors (e.g. `#viewsManager` vs. `.sidebar`).
+      let top = rule;
+      while (top.parent?.type === "rule") {
+        top = top.parent;
+      }
+      const prefix =
+        top === rule &&
+        selector.includes("#") &&
+        !/^\s*\.pdfjs-element\b/.test(selector)
+          ? `${rootSelector} `
+          : "";
+      rule.selectors = selector
+        .split(",")
+        .map(part =>
+          part
+            .replaceAll(/(^|,)\s*(:root|html|body)\b/g, `$1${rootSelector}`)
+            .replaceAll(/(^|[\s,>~+&(])\s*#([a-z][\w-]*)/gi, "$1.$2")
+        )
+        .map(part => `${prefix}${part}`);
+    },
+    Declaration(decl) {
+      if (
+        decl.prop === "inset-inline-start" &&
+        decl.value.includes("viewsManager-width") &&
+        decl.parent?.selector.includes("viewerContainer")
+      ) {
+        // The views manager overlays the page; the page area must not yield
+        // any width when the sidebar is opened.
+        decl.value = "0 !important";
+      }
+      if (decl.value.includes("vw")) {
+        // `vw` is viewport based, but in the element context it must be
+        // relative to the (instance) width.
+        decl.value = decl.value.replaceAll(/(\d+(?:\.\d+)?)vw/g, "$1%");
+      }
+    },
+  };
+}
+
 function preprocessHTML(source, defines) {
   defines = {
     ...defines,
@@ -1400,6 +1518,144 @@ gulp.task(
       const defines = { ...DEFINES, GENERIC: true };
 
       return buildGeneric(defines, GENERIC_DIR);
+    }
+  )
+);
+
+// (Re-)generates `element/viewer_template.js`, which contains the markup that
+// the `<pdf-viewer-element>` Custom Element instantiates per instance. The
+// markup is extracted from the (preprocessed) `web/viewer.html`, so that the
+// template can never get out of sync with the markup used by the viewer.
+async function createElementTemplate(defines) {
+  console.log("\n### Generating element template");
+  const outName = getTempFile("~element-template", ".html");
+  preprocess("web/viewer.html", outName, defines);
+  const html = fs.readFileSync(outName).toString().replaceAll("\r\n", "\n");
+  fs.unlinkSync(outName);
+
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (!bodyMatch) {
+    throw new Error(
+      "Unable to find the viewer body in `web/viewer.html`; " +
+        "cannot generate `element/viewer_template.js`."
+    );
+  }
+  const bodyHtml = bodyMatch[1].replace(/^\r?\n/, "").trimEnd();
+
+  const content = `${ELEMENT_TEMPLATE_HEADER}
+
+const viewerHtml = \`
+${bodyHtml}
+\`;
+
+export { viewerHtml };
+`;
+
+  const filePath = "element/viewer_template.js";
+  if (
+    !checkFile(filePath) ||
+    fs.readFileSync(filePath).toString() !== content
+  ) {
+    console.log(`  Updating ${filePath}`);
+    fs.writeFileSync(filePath, content);
+  }
+}
+
+const ELEMENT_TEMPLATE_HEADER = [
+  "/* Copyright 2026 wbw121124",
+  " *",
+  " * This file is generated from `web/viewer.html` by the `gulp element` target,",
+  " * and contains the (trimmed) viewer markup used by the",
+  " * `<pdf-viewer-element>` Custom Element.",
+  " *",
+  " * NOTE: The text is *not* a complete document, but the markup of the viewer",
+  " * body. The `id` attributes are transformed to instance-specific ids and",
+  " * corresponding CSS classes (used for styling multiple instances) by the",
+  " * Custom Element implementation itself.",
+  " *",
+  ' * Licensed under the Apache License, Version 2.0 (the "License");',
+  " * you may not use this file except in compliance with the License.",
+  " * You may obtain a copy of the License at",
+  " *",
+  " *     http://www.apache.org/licenses/LICENSE-2.0",
+  " *",
+  " * Unless required by applicable law or agreed to in writing, software",
+  ' * distributed under the License is distributed on an "AS IS" BASIS,',
+  " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.",
+  " * See the License for the specific language governing permissions and",
+  " * limitations under the License.",
+  " */",
+].join("\n");
+
+function buildElement(defines, dir) {
+  fs.rmSync(dir, { recursive: true, force: true });
+
+  return ordered([
+    createElementBundle(defines, {
+      // The element bundle must be self-contained, hence the PDF.js library
+      // itself is included directly instead of being loaded via the
+      // `globalThis.pdfjsLib` that the `web/pdfjs.js` shim uses for the
+      // generic viewer.
+      aliasOverrides: { "pdfjs-lib": path.join(__dirname, "src/pdf.js") },
+    }).pipe(gulp.dest(dir)),
+    createWorkerBundle(defines).pipe(gulp.dest(dir)),
+    createSandboxBundle(defines).pipe(gulp.dest(dir)),
+    createCMapBundle().pipe(gulp.dest(dir + "cmaps")),
+    createICCBundle().pipe(gulp.dest(dir + "iccs")),
+    createStandardFontBundle().pipe(gulp.dest(dir + "standard_fonts")),
+    createWasmBundle().pipe(gulp.dest(dir + "wasm")),
+    gulp
+      .src(["web/images/*.{png,svg,gif}"], {
+        base: "web/images/",
+        encoding: false,
+      })
+      .pipe(gulp.dest(dir + "images")),
+    gulp.src("LICENSE", { encoding: false }).pipe(gulp.dest(dir)),
+    // The locale files, i.e. `locale.json` and the available `viewer.ftl`
+    // translations, used by the `lang`/`l10n-url` element attributes.
+    gulp
+      .src(["web/locale/*/viewer.ftl", "web/locale/locale.json"], {
+        base: "web/",
+        encoding: false,
+      })
+      .pipe(gulp.dest(dir)),
+    preprocessCSS("web/viewer.css", defines)
+      .pipe(
+        postcss([
+          discardCommentsCSS(),
+          autoprefixer(AUTOPREFIXER_CONFIG),
+          scopeCSSForElement(),
+        ])
+      )
+      .pipe(rename("pdf-viewer-element.css"))
+      .pipe(gulp.dest(dir)),
+    gulp
+      .src("web/compressed.tracemonkey-pldi-09.pdf", { encoding: false })
+      .pipe(gulp.dest(dir)),
+    gulp.src("element/demo.html", { encoding: false }).pipe(gulp.dest(dir)),
+  ]);
+}
+
+// Builds the `<pdf-viewer-element>` Custom Element; see `element/` for the
+// sources and `element/demo.html` for a usage example.
+gulp.task(
+  "element",
+  gulp.series(
+    createBuildNumber,
+    "locale",
+    function scriptingElement() {
+      const defines = { ...DEFINES, GENERIC: true };
+      return createTemporaryScriptingBundle(defines);
+    },
+    function elementTemplate() {
+      const defines = { ...DEFINES, GENERIC: true };
+      return createElementTemplate(defines);
+    },
+    function createElement() {
+      console.log("\n### Creating element");
+      const defines = { ...DEFINES, GENERIC: true };
+
+      return buildElement(defines, ELEMENT_DIR);
     }
   )
 );
@@ -2363,6 +2619,9 @@ gulp.task("lint-licenses", function (done) {
   // Files with non-standard license headers (different copyright holder,
   // different license, or missing license).
   const NON_STANDARD_HEADER_FILES = new Set([
+    "element/demo.html",
+    "element/pdf-viewer-element.js",
+    "element/viewer_template.js",
     "examples/learning/helloworld.html",
     "examples/learning/helloworld64.html",
     "examples/learning/prevnext.html",
@@ -2391,8 +2650,9 @@ gulp.task("lint-licenses", function (done) {
   gulp
     .src(
       [
-        "{src,web,test,examples}/**/*.{js,mjs,css}",
+        "{src,web,test,examples,element}/**/*.{js,mjs,css}",
         "examples/**/*.html",
+        "element/**/*.html",
         "!web/wasm/**/*",
       ],
       { base: "." }
@@ -2741,6 +3001,22 @@ gulp.task(
         gulp.series("dev-sandbox")
       );
     },
+    function watchElement() {
+      // The element bundle is heavy, hence it's only (re-)built when its
+      // sources change; if the demo has never been built, build it once so
+      // that it's available immediately after `gulp server` starts.
+      if (!checkFile(ELEMENT_DIR + "demo.html")) {
+        gulp.series("element")(err => {
+          if (err) {
+            console.error("Failed to build the element:", err);
+          }
+        });
+      }
+      gulp.watch(
+        ["element/**/*", "web/viewer.html", "web/viewer.css"],
+        gulp.series("element")
+      );
+    },
     async function createServer() {
       console.log("\n### Starting local server");
 
@@ -2765,7 +3041,13 @@ gulp.task(
       }
 
       const { WebServer } = await import("./test/webserver.mjs");
-      const server = new WebServer({ host, port });
+      const server = new WebServer({
+        host,
+        port,
+        // Serve the `<pdf-viewer-element>` demo (built by `gulp element`)
+        // under a stable URL, without having to reference the `build/` dir.
+        aliases: { "/element/": "build/generic/element/" },
+      });
       server.start();
     }
   )

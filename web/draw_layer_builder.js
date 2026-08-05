@@ -13,72 +13,22 @@
  * limitations under the License.
  */
 
-import { DrawLayer } from "pdfjs-lib";
-
-/**
- * @typedef DrawLayerBuilderOptions
- *   Configuration for {@linkcode DrawLayerBuilder}.
- * @property {number} pageIndex
- *   Zero-based page index.
- * @property {Element | null} [textLayer]
- *   Text layer element (optional).
- * @property {Object | null} [filterFactory]
- *   Filter factory used to style selections (optional).
- * @property {Object | null} [pageColors]
- *   Page foreground/background colors for HCM (optional).
- */
-
-/**
- * @typedef {Object} DrawLayerBuilderRenderOptions
- * @property {string} [intent] - The default value is "display".
- */
-
+// Stub file - editor functionality removed
 class DrawLayerBuilder {
-  #drawLayer = null;
+  dispose() {}
 
-  /**
-   * @param {DrawLayerBuilderOptions} options
-   *   Configuration.
-   * @returns
-   *   Instance.
-   */
-  constructor(options) {
-    this.pageIndex = options.pageIndex;
-    this.textLayer = options.textLayer || null;
-    this.filterFactory = options.filterFactory || null;
-    this.pageColors = options.pageColors || null;
-  }
+  async setParent() {}
 
-  /**
-   * @param {DrawLayerBuilderRenderOptions} options
-   * @returns {Promise<void>}
-   */
-  async render({ intent = "display" }) {
-    if (intent !== "display" || this.#drawLayer || this._cancelled) {
-      return;
-    }
-    this.#drawLayer = new DrawLayer({
-      pageIndex: this.pageIndex,
-      textLayer: this.textLayer,
-      filterFactory: this.filterFactory,
-      pageColors: this.pageColors,
-    });
-  }
+  async render() {}
 
-  cancel() {
-    this._cancelled = true;
-
-    this.#drawLayer?.destroy();
-    this.#drawLayer = null;
-  }
-
-  setParent(parent) {
-    this.#drawLayer?.setParent(parent);
-  }
+  cancel() {}
 
   getDrawLayer() {
-    return this.#drawLayer;
+    return null;
+  }
+
+  get drawingSession() {
+    return null;
   }
 }
-
 export { DrawLayerBuilder };

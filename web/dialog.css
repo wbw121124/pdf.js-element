@@ -14,26 +14,26 @@
  */
 
 .dialog {
-  --dialog-bg-color: var(--background-color-canvas, light-dark(white, #1c1b22));
+  --dialog-bg-color: var(--background-color-canvas, light-dark(white, #252526));
   --dialog-border-color: var(
     --background-color-canvas,
-    light-dark(white, #1c1b22)
+    light-dark(white, #252526)
   );
-  --dialog-shadow: 0 2px 14px 0 light-dark(rgb(58 57 68 / 0.2), #15141a);
-  --text-secondary-color: light-dark(#5b5b66, #cfcfd8);
-  --separator-color: light-dark(#f0f0f4, #52525e);
+  --dialog-shadow: 0 2px 14px 0 light-dark(rgb(58 57 68 / 0.2), #fff);
+  --text-secondary-color: light-dark(#5b5b66, #989898);
+  --separator-color: light-dark(#f0f0f4, #3f3f3f);
 
   /* A textarea is an interactive control, so it takes the interactive border
      token (whose light value is the shipped literal) and not --border-color,
      which is the low-contrast decorative one. */
   --textarea-border-color: var(--border-color-interactive, #8f8f9d);
-  --textarea-bg-color: light-dark(white, #42414d);
+  --textarea-bg-color: light-dark(white, #252526);
   --textarea-fg-color: var(--text-secondary-color);
 
   /* .primaryButton / .secondaryButton button tokens are defined once, at :root
      in buttons.css (the shared primitive), and inherit into dialogs. */
 
-  --input-text-bg-color: light-dark(white, #42414d);
+  --input-text-bg-color: light-dark(white, #252526);
   --input-text-fg-color: var(--text-primary-color);
 
   @media screen and (forced-colors: active) {
@@ -105,7 +105,7 @@
        matching Firefox's default form controls (the custom appearance is
        Nova-only in Firefox, so the default look is native + accent-color). */
     input:is([type="checkbox"], [type="radio"]) {
-      accent-color: var(--color-accent-primary, light-dark(#0060df, #0df));
+      accent-color: var(--color-accent-primary, light-dark(#0060df, #3794ff));
       width: var(--checkbox-size, 16px);
       height: var(--checkbox-size, 16px);
     }
@@ -204,11 +204,8 @@
 
     .messageBar {
       --message-bar-bg-color: light-dark(#ffebcd, #5a3100);
-      --message-bar-fg-color: light-dark(#15141a, #fbfbfe);
-      --message-bar-border-color: light-dark(
-        rgb(0 0 0 / 0.08),
-        rgb(255 255 255 / 0.08)
-      );
+      --message-bar-fg-color: light-dark(#15141a, #d4d4d4);
+      --message-bar-border-color: light-dark(rgb(0 0 0 / 0.08), #2a2d2e);
       --message-bar-icon: url(images/messageBar_warning.svg);
       --message-bar-icon-color: light-dark(#cd411e, #e49c49);
 

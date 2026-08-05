@@ -13,90 +13,12 @@
  * limitations under the License.
  */
 
-import { isPdfFile } from "pdfjs-lib";
-
+// Stub file - download functionality removed
 class BaseDownloadManager {
-  #openBlobUrls = new WeakMap();
+  downloadData() {}
 
-  constructor() {
-    if (
-      (typeof PDFJSDev === "undefined" || PDFJSDev.test("TESTING")) &&
-      this.constructor === BaseDownloadManager
-    ) {
-      throw new Error("Cannot initialize BaseDownloadManager.");
-    }
-  }
+  openOrDownloadData() {}
 
-  _triggerDownload(blobUrl, originalUrl, filename, isAttachment = false) {
-    throw new Error("Not implemented: _triggerDownload");
-  }
-
-  _getOpenDataUrl(blobUrl, filename, dest = null) {
-    throw new Error("Not implemented: _getOpenDataUrl");
-  }
-
-  /**
-   * @param {Uint8Array} data
-   * @param {string} filename
-   * @param {string} [contentType]
-   */
-  downloadData(data, filename, contentType) {
-    const blobUrl = URL.createObjectURL(
-      new Blob([data], { type: contentType })
-    );
-
-    this._triggerDownload(
-      blobUrl,
-      /* originalUrl = */ blobUrl,
-      filename,
-      /* isAttachment = */ true
-    );
-  }
-
-  /**
-   * @param {Uint8Array} data
-   * @param {string} filename
-   * @param {string | null} [dest]
-   * @returns {boolean} Indicating if the data was opened.
-   */
-  openOrDownloadData(data, filename, dest = null) {
-    const isPdfData = isPdfFile(filename);
-    const contentType = isPdfData ? "application/pdf" : "";
-
-    if (isPdfData) {
-      const blobUrl = this.#openBlobUrls.getOrInsertComputed(data, () =>
-        URL.createObjectURL(new Blob([data], { type: contentType }))
-      );
-      try {
-        const viewerUrl = this._getOpenDataUrl(blobUrl, filename, dest);
-
-        window.open(viewerUrl);
-        return true;
-      } catch (ex) {
-        console.error("openOrDownloadData:", ex);
-        // Release the `blobUrl`, since opening it failed, and fallback to
-        // downloading the PDF file.
-        URL.revokeObjectURL(blobUrl);
-        this.#openBlobUrls.delete(data);
-      }
-    }
-
-    this.downloadData(data, filename, contentType);
-    return false;
-  }
-
-  /**
-   * @param {Uint8Array} data
-   * @param {string} url
-   * @param {string} filename
-   */
-  download(data, url, filename) {
-    const blobUrl = data
-      ? URL.createObjectURL(new Blob([data], { type: "application/pdf" }))
-      : null;
-
-    this._triggerDownload(blobUrl, /* originalUrl = */ url, filename);
-  }
+  download() {}
 }
-
 export { BaseDownloadManager };

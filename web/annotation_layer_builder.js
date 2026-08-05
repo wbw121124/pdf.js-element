@@ -22,9 +22,7 @@
 /** @typedef {import("./struct_tree_layer_builder.js").StructTreeLayerBuilder} StructTreeLayerBuilder */
 // eslint-disable-next-line max-len
 /** @typedef {import("./text_accessibility.js").TextAccessibilityManager} TextAccessibilityManager */
-// eslint-disable-next-line max-len
-/** @typedef {import("../src/display/editor/tools.js").AnnotationEditorUIManager} AnnotationEditorUIManager */
-/** @typedef {import("./comment_manager.js").CommentManager} CommentManager */
+
 /** @typedef {import("./pdf_link_service.js").PDFLinkService} PDFLinkService */
 // eslint-disable-next-line max-len
 /** @typedef {import("./base_download_manager.js").BaseDownloadManager} BaseDownloadManager */
@@ -54,9 +52,7 @@ import { PresentationModeState } from "./ui_utils.js";
  *   [fieldObjectsPromise]
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
  * @property {TextAccessibilityManager} [accessibilityManager]
- * @property {AnnotationEditorUIManager} [annotationEditorUIManager]
  * @property {function} [onAppend]
- * @property {CommentManager} [commentManager]
  */
 
 /**
@@ -69,8 +65,6 @@ import { PresentationModeState } from "./ui_utils.js";
 
 class AnnotationLayerBuilder {
   #annotations = null;
-
-  #commentManager = null;
 
   #onAppend = null;
 
@@ -88,14 +82,11 @@ class AnnotationLayerBuilder {
     annotationStorage = null,
     imageResourcesPath = "",
     renderForms = true,
-    enableComment = false,
-    commentManager = null,
     enableScripting = false,
     hasJSActionsPromise = null,
     fieldObjectsPromise = null,
     annotationCanvasMap = null,
     accessibilityManager = null,
-    annotationEditorUIManager = null,
     onAppend = null,
   }) {
     this.pdfPage = pdfPage;
@@ -104,14 +95,11 @@ class AnnotationLayerBuilder {
     this.imageResourcesPath = imageResourcesPath;
     this.renderForms = renderForms;
     this.annotationStorage = annotationStorage;
-    this.enableComment = enableComment;
-    this.#commentManager = commentManager;
     this.enableScripting = enableScripting;
     this._hasJSActionsPromise = hasJSActionsPromise || Promise.resolve(false);
     this._fieldObjectsPromise = fieldObjectsPromise || Promise.resolve(null);
     this._annotationCanvasMap = annotationCanvasMap;
     this._accessibilityManager = accessibilityManager;
-    this._annotationEditorUIManager = annotationEditorUIManager;
     this.#onAppend = onAppend;
 
     this.annotationLayer = null;
@@ -207,12 +195,10 @@ class AnnotationLayerBuilder {
       div: this.div,
       accessibilityManager: this._accessibilityManager,
       annotationCanvasMap: this._annotationCanvasMap,
-      annotationEditorUIManager: this._annotationEditorUIManager,
       annotationStorage: this.annotationStorage,
       page: this.pdfPage,
       viewport: viewport.clone({ dontFlip: true }),
       structTreeLayer,
-      commentManager: this.#commentManager,
       linkService: this.linkService,
     });
   }

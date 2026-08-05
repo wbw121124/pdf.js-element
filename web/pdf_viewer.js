@@ -25,13 +25,9 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_scripting_manager").PDFScriptingManager} PDFScriptingManager */
 /** @typedef {import("./pdf_link_service.js").PDFLinkService} PDFLinkService */
-// eslint-disable-next-line max-len
-/** @typedef {import("./base_download_manager.js").BaseDownloadManager} BaseDownloadManager */
 /** @typedef {import("./l10n.js").L10n} L10n */
 
 import {
-  AnnotationEditorType,
-  AnnotationEditorUIManager,
   AnnotationMode,
   makeArr,
   MathClamp,
@@ -80,21 +76,12 @@ const PagesCountLimit = {
   PAUSE_EAGER_PAGE_INIT: 250,
 };
 
-function isValidAnnotationEditorMode(mode) {
-  return (
-    Object.values(AnnotationEditorType).includes(mode) &&
-    mode !== AnnotationEditorType.DISABLE
-  );
-}
-
 /**
  * @typedef {Object} PDFViewerOptions
  * @property {HTMLDivElement} container - The container for the viewer element.
  * @property {HTMLDivElement} [viewer] - The viewer element.
  * @property {EventBus} eventBus - The application event bus.
  * @property {PDFLinkService} [linkService] - The navigation/linking service.
- * @property {BaseDownloadManager} [downloadManager] - The download manager
- *   component.
  * @property {PDFFindController} [findController] - The find controller
  *   component.
  * @property {PDFScriptingManager} [scriptingManager] - The scripting manager
@@ -110,11 +97,6 @@ function isValidAnnotationEditorMode(mode) {
  *   being rendered. The constants from {@link AnnotationMode} should be used;
  *   see also {@link RenderParameters} and {@link GetOperatorListParameters}.
  *   The default value is `AnnotationMode.ENABLE_FORMS`.
- * @property {number} [annotationEditorMode] - Enables the creation and editing
- *   of new Annotations. The constants from {@link AnnotationEditorType} should
- *   be used. The default value is `AnnotationEditorType.NONE`.
- * @property {string} [annotationEditorHighlightColors] - A comma separated list
- *   of colors to propose to highlight some text in the pdf.
  * @property {string} [imageResourcesPath] - Path for image resources, mainly
  *   mainly for annotation icons. Include trailing slash.
  * @property {boolean} [enablePrintAutoRotate] - Enables automatic rotation of
@@ -149,8 +131,6 @@ function isValidAnnotationEditorMode(mode) {
  * @property {Object} [pageColors] - Overwrites background and foreground colors
  *   with user defined ones in order to improve readability in high contrast
  *   mode.
- * @property {boolean} [supportsPinchToZoom] - Enable zooming on pinch gesture.
- *   The default value is `true`.
  * @property {boolean} [enableAutoLinking] - Enable creation of hyperlinks from
  *   text that look like URLs. The default value is `true`.
  * @property {number} [minDurationToUpdateCanvas] - Minimum duration to wait
@@ -231,29 +211,11 @@ class PDFPageViewBuffer {
 class PDFViewer {
   #buffer = null;
 
-  #altTextManager = null;
-
-  #annotationEditorHighlightColors = null;
-
-  #annotationEditorMode = AnnotationEditorType.NONE;
-
-  #annotationEditorUIManager = null;
-
   #annotationMode = AnnotationMode.ENABLE_FORMS;
-
-  #commentManager = null;
 
   #containerTopLeft = null;
 
-  #editorUndoBar = null;
-
-  #enableHighlightFloatingButton = false;
-
   #enablePermissions = false;
-
-  #enableUpdatedAddImage = false;
-
-  #enableNewAltTextWhenAddingImage = false;
 
   #enableAutoLinking = true;
 
@@ -263,15 +225,9 @@ class PDFViewer {
 
   #minDurationToUpdateCanvas = 0;
 
-  #mlManager = null;
-
   #printingAllowed = true;
 
   #scrollTimeoutId = null;
-
-  #switchAnnotationEditorModeAC = null;
-
-  #switchAnnotationEditorModeTimeoutId = null;
 
   #copyAllInProgress = false;
 
@@ -285,19 +241,7 @@ class PDFViewer {
 
   #scaleTimeoutId = null;
 
-  #signatureManager = null;
-
-  #supportsPinchToZoom = true;
-
   #textLayerMode = TextLayerMode.ENABLE;
-
-  #viewerAlert = null;
-
-  #copiedPageViews = null;
-
-  #savedPageViews = null;
-
-  #deletedPageNumbers = null;
 
   /**
    * @param {PDFViewerOptions} options
@@ -313,8 +257,6 @@ class PDFViewer {
 
     this.container = options.container;
     this.viewer = options.viewer || options.container.firstElementChild;
-    this.#viewerAlert = options.viewerAlert || null;
-
     if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
       if (this.container?.tagName !== "DIV" || this.viewer?.tagName !== "DIV") {
         throw new Error("Invalid `container` and/or `viewer` option.");
@@ -333,10 +275,6 @@ class PDFViewer {
     this.linkService = options.linkService || new SimpleLinkService();
     this.downloadManager = options.downloadManager || null;
     this.findController = options.findController || null;
-    this.#altTextManager = options.altTextManager || null;
-    this.#commentManager = options.commentManager || null;
-    this.#signatureManager = options.signatureManager || null;
-    this.#editorUndoBar = options.editorUndoBar || null;
 
     if (this.findController) {
       this.findController.onIsPageVisible = pageNumber =>
@@ -346,15 +284,6 @@ class PDFViewer {
     this.#textLayerMode = options.textLayerMode ?? TextLayerMode.ENABLE;
     this.#annotationMode =
       options.annotationMode ?? AnnotationMode.ENABLE_FORMS;
-    this.#annotationEditorMode =
-      options.annotationEditorMode ?? AnnotationEditorType.NONE;
-    this.#annotationEditorHighlightColors =
-      options.annotationEditorHighlightColors || null;
-    this.#enableHighlightFloatingButton =
-      options.enableHighlightFloatingButton === true;
-    this.#enableUpdatedAddImage = options.enableUpdatedAddImage === true;
-    this.#enableNewAltTextWhenAddingImage =
-      options.enableNewAltTextWhenAddingImage === true;
     this.imageResourcesPath = options.imageResourcesPath || "";
     this.enablePrintAutoRotate = options.enablePrintAutoRotate || false;
     if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
@@ -374,8 +303,6 @@ class PDFViewer {
     }
     this.#enablePermissions = options.enablePermissions || false;
     this.pageColors = options.pageColors || null;
-    this.#mlManager = options.mlManager || null;
-    this.#supportsPinchToZoom = options.supportsPinchToZoom !== false;
     this.#enableAutoLinking = options.enableAutoLinking !== false;
     this.#minDurationToUpdateCanvas = options.minDurationToUpdateCanvas ?? 500;
 
@@ -690,9 +617,6 @@ class PDFViewer {
   get _layerProperties() {
     const self = this;
     return shadow(this, "_layerProperties", {
-      get annotationEditorUIManager() {
-        return self.#annotationEditorUIManager;
-      },
       get annotationStorage() {
         return self.pdfDocument?.annotationStorage;
       },
@@ -700,7 +624,7 @@ class PDFViewer {
         return self.downloadManager;
       },
       get enableComment() {
-        return !!self.#commentManager;
+        return false;
       },
       get enableScripting() {
         return !!self._scriptingManager;
@@ -731,7 +655,6 @@ class PDFViewer {
    */
   #initializePermissions(permissions) {
     const params = {
-      annotationEditorMode: this.#annotationEditorMode,
       annotationMode: this.#annotationMode,
       textLayerMode: this.#textLayerMode,
     };
@@ -750,10 +673,6 @@ class PDFViewer {
       this.#textLayerMode === TextLayerMode.ENABLE
     ) {
       params.textLayerMode = TextLayerMode.ENABLE_PERMISSIONS;
-    }
-
-    if (!permissions.includes(PermissionFlag.MODIFY_CONTENTS)) {
-      params.annotationEditorMode = AnnotationEditorType.DISABLE;
     }
 
     if (
@@ -915,10 +834,6 @@ class PDFViewer {
       this.findController?.setDocument(null);
       this._scriptingManager?.setDocument(null);
 
-      this.#annotationEditorUIManager?.destroy();
-      this.#annotationEditorUIManager = null;
-
-      this.#annotationEditorMode = AnnotationEditorType.NONE;
       this.#printingAllowed = true;
     }
 
@@ -992,7 +907,7 @@ class PDFViewer {
         this._firstPageCapability.resolve(firstPdfPage);
         this._optionalContentConfigPromise = optionalContentConfigPromise;
 
-        const { annotationEditorMode, annotationMode, textLayerMode } =
+        const { annotationMode, textLayerMode } =
           this.#initializePermissions(permissions);
 
         if (textLayerMode !== TextLayerMode.DISABLE) {
@@ -1002,43 +917,6 @@ class PDFViewer {
           element.style.cssText =
             "position:absolute;top:0;left:0;width:0;height:0;display:none";
           viewer.before(element);
-        }
-
-        if (annotationEditorMode !== AnnotationEditorType.DISABLE) {
-          const mode = annotationEditorMode;
-
-          if (pdfDocument.isPureXfa) {
-            console.warn("Warning: XFA-editing is not implemented.");
-          } else if (isValidAnnotationEditorMode(mode)) {
-            this.#annotationEditorUIManager = new AnnotationEditorUIManager(
-              this.container,
-              viewer,
-              this.#viewerAlert,
-              this.#altTextManager,
-              this.#commentManager,
-              this.#signatureManager,
-              eventBus,
-              pdfDocument,
-              pageColors,
-              this.#annotationEditorHighlightColors,
-              this.#enableHighlightFloatingButton,
-              this.#enableUpdatedAddImage,
-              this.#enableNewAltTextWhenAddingImage,
-              this.#mlManager,
-              this.#editorUndoBar,
-              this.#supportsPinchToZoom
-            );
-            eventBus.dispatch("annotationeditoruimanager", {
-              source: this,
-              uiManager: this.#annotationEditorUIManager,
-            });
-            if (mode !== AnnotationEditorType.NONE) {
-              this.#preloadEditingData(mode);
-              this.#annotationEditorUIManager.updateMode(mode);
-            }
-          } else {
-            console.error(`Invalid AnnotationEditor mode: ${mode}`);
-          }
         }
 
         const viewerElement =
@@ -1105,7 +983,6 @@ class PDFViewer {
             layerProperties: this._layerProperties,
             enableAutoLinking: this.#enableAutoLinking,
             minDurationToUpdateCanvas: this.#minDurationToUpdateCanvas,
-            commentManager: this.#commentManager,
             abortSignal: this.#abortSignal,
           });
           this._pages.push(pageView);
@@ -1121,20 +998,6 @@ class PDFViewer {
         } else if (this._spreadMode !== SpreadMode.NONE) {
           this._updateSpreadMode();
         }
-
-        eventBus.on(
-          "annotationeditorlayerrendered",
-          evt => {
-            if (this.#annotationEditorUIManager) {
-              // Ensure that the Editor buttons, in the toolbar, are updated.
-              eventBus.dispatch("annotationeditormodechanged", {
-                source: this,
-                mode: this.#annotationEditorMode,
-              });
-            }
-          },
-          { once: true, signal, ...internalOpt }
-        );
 
         // Fetch all the pages since the viewport is needed before printing
         // starts to create the correct size canvas. Wait until one page is
@@ -1220,110 +1083,6 @@ class PDFViewer {
       });
   }
 
-  onPagesEdited({ pagesMapper, type, hasBeenCut, pageNumbers }) {
-    if (type === "copy") {
-      this.#copiedPageViews = new Map();
-      for (const pageNum of pageNumbers) {
-        this.#copiedPageViews.set(pageNum, this._pages[pageNum - 1]);
-      }
-      return;
-    }
-
-    if (type === "cancelCopy") {
-      this.#copiedPageViews = null;
-      return;
-    }
-
-    const isCut = type === "cut";
-    if (isCut || type === "delete") {
-      this.#savedPageViews = this._pages;
-      this.#deletedPageNumbers = pageNumbers;
-    }
-
-    if (type === "cancelDelete") {
-      this.#deletedPageNumbers = null;
-      if (!this.#savedPageViews) {
-        return;
-      }
-      const viewerElement =
-        this._scrollMode === ScrollMode.PAGE ? null : this.viewer;
-      if (viewerElement) {
-        this.#annotationEditorUIManager?.startUpdatePages();
-        const fragment = document.createDocumentFragment();
-        for (let i = 0, ii = this.#savedPageViews.length; i < ii; i++) {
-          const page = this.#savedPageViews[i];
-          page.updatePageNumber(i + 1);
-          fragment.append(page.div);
-        }
-        viewerElement.replaceChildren(fragment);
-        this.#annotationEditorUIManager?.endUpdatePages();
-      }
-      this._pages = this.#savedPageViews;
-      this.#savedPageViews = null;
-      return;
-    }
-
-    if (type === "cleanSavedData") {
-      if (this.#deletedPageNumbers) {
-        if (this.#savedPageViews) {
-          for (const pageNum of this.#deletedPageNumbers) {
-            this.#savedPageViews[pageNum - 1].deleteMe();
-          }
-          this.#savedPageViews = null;
-        }
-        this.#deletedPageNumbers = null;
-      }
-      return;
-    }
-
-    this._currentPageNumber = 0;
-    const prevPages = this._pages;
-    const newPages = (this._pages = []);
-
-    this.#annotationEditorUIManager?.startUpdatePages();
-
-    for (let i = 1, ii = pagesMapper.pagesNumber; i <= ii; i++) {
-      const prevPageNumber = pagesMapper.getPrevPageNumber(i);
-      if (prevPageNumber < 0) {
-        let page = this.#copiedPageViews.get(-prevPageNumber);
-        if (hasBeenCut) {
-          page.updatePageNumber(i);
-        } else {
-          this.#annotationEditorUIManager?.clonePage(
-            -prevPageNumber - 1,
-            i - 1
-          );
-          page = page.clone(i);
-        }
-        newPages.push(page);
-        continue;
-      }
-      const page = prevPages[prevPageNumber - 1];
-      newPages.push(page);
-      page.updatePageNumber(i);
-    }
-
-    this.#annotationEditorUIManager?.endUpdatePages();
-
-    if (type === "paste") {
-      this.#copiedPageViews = null;
-    }
-
-    const viewerElement =
-      this._scrollMode === ScrollMode.PAGE ? null : this.viewer;
-    if (viewerElement) {
-      const fragment = document.createDocumentFragment();
-      for (const { div } of newPages) {
-        fragment.append(div);
-      }
-      viewerElement.replaceChildren(fragment);
-    }
-
-    setTimeout(() => {
-      this.forceRendering();
-    });
-  }
-
   /**
    * @param {Array|null} labels
    */
@@ -1384,7 +1143,6 @@ class PDFViewer {
     this.#hiddenCopyElement = null;
 
     this.#cleanupTimeouts();
-    this.#cleanupSwitchAnnotationEditorMode();
   }
 
   #ensurePageViewVisible() {
@@ -1955,32 +1713,6 @@ class PDFViewer {
     });
   }
 
-  #switchToEditAnnotationMode() {
-    const visible = this._getVisiblePages();
-    const pagesToRefresh = [];
-    const { ids, views } = visible;
-    for (const page of views) {
-      const { view } = page;
-      if (!view.hasEditableAnnotations()) {
-        ids.delete(view.id);
-        continue;
-      }
-      pagesToRefresh.push(page);
-    }
-
-    if (pagesToRefresh.length === 0) {
-      return null;
-    }
-    this.renderingQueue.renderHighestPriority({
-      first: pagesToRefresh[0],
-      last: pagesToRefresh.at(-1),
-      views: pagesToRefresh,
-      ids,
-    });
-
-    return ids;
-  }
-
   containsElement(element) {
     return this.container.contains(element);
   }
@@ -2543,7 +2275,11 @@ class PDFViewer {
   #updateContainerHeightCss(height = this.container.clientHeight) {
     if (height !== this.#previousContainerHeight) {
       this.#previousContainerHeight = height;
-      docStyle.setProperty("--viewer-container-height", `${height}px`);
+      // In the `<pdf-viewer-element>` context the property must be set on
+      // the instance root, to avoid clobbering the value of other instances
+      // (or the standalone viewer) on the same page.
+      const style = this.container.closest(".pdfjs-element")?.style ?? docStyle;
+      style.setProperty("--viewer-container-height", `${height}px`);
     }
   }
 
@@ -2575,140 +2311,6 @@ class PDFViewer {
       clearTimeout(this.#scrollTimeoutId);
       this.#scrollTimeoutId = null;
     }
-  }
-
-  #cleanupSwitchAnnotationEditorMode() {
-    this.#switchAnnotationEditorModeAC?.abort();
-    this.#switchAnnotationEditorModeAC = null;
-
-    if (this.#switchAnnotationEditorModeTimeoutId !== null) {
-      clearTimeout(this.#switchAnnotationEditorModeTimeoutId);
-      this.#switchAnnotationEditorModeTimeoutId = null;
-    }
-  }
-
-  #preloadEditingData(mode) {
-    switch (mode) {
-      case AnnotationEditorType.STAMP:
-        this.#mlManager?.loadModel("altText");
-        break;
-      case AnnotationEditorType.SIGNATURE:
-        // Start to load the signature data.
-        this.#signatureManager?.loadSignatures();
-        break;
-    }
-  }
-
-  get annotationEditorMode() {
-    return this.#annotationEditorUIManager
-      ? this.#annotationEditorMode
-      : AnnotationEditorType.DISABLE;
-  }
-
-  /**
-   * @typedef {Object} AnnotationEditorModeOptions
-   * @property {number} mode - The editor mode (none, FreeText, ink, ...).
-   * @property {string|null} [editId] - ID of the existing annotation to edit.
-   * @property {boolean} [isFromKeyboard] - True if the mode change is due to a
-   *   keyboard action.
-   * @property {boolean} [mustEnterInEditMode] - True if the editor must enter
-   *   edit mode.
-   * @property {boolean} [editComment] - True if the editor must enter
-   *   comment edit mode.
-   */
-
-  /**
-   * @param {AnnotationEditorModeOptions} options
-   */
-  set annotationEditorMode({
-    mode,
-    editId = null,
-    isFromKeyboard = false,
-    mustEnterInEditMode = false,
-    editComment = false,
-  }) {
-    if (!this.#annotationEditorUIManager) {
-      throw new Error(`The AnnotationEditor is not enabled.`);
-    }
-    if (this.#annotationEditorMode === mode) {
-      return; // The AnnotationEditor mode didn't change.
-    }
-    if (!isValidAnnotationEditorMode(mode)) {
-      throw new Error(`Invalid AnnotationEditor mode: ${mode}`);
-    }
-    if (!this.pdfDocument) {
-      return;
-    }
-    this.#preloadEditingData(mode);
-
-    const { eventBus, pdfDocument } = this;
-    const updater = async () => {
-      this.#cleanupSwitchAnnotationEditorMode();
-      this.#annotationEditorMode = mode;
-      await this.#annotationEditorUIManager.updateMode(
-        mode,
-        editId,
-        /* isFromUser = */ true,
-        isFromKeyboard,
-        mustEnterInEditMode,
-        editComment
-      );
-      if (
-        mode !== this.#annotationEditorMode ||
-        pdfDocument !== this.pdfDocument
-      ) {
-        // Since `updateMode` is async, the active mode could have changed.
-        return;
-      }
-      eventBus.dispatch("annotationeditormodechanged", {
-        source: this,
-        mode,
-      });
-    };
-
-    if (
-      mode === AnnotationEditorType.NONE ||
-      this.#annotationEditorMode === AnnotationEditorType.NONE
-    ) {
-      const isEditing = mode !== AnnotationEditorType.NONE;
-      if (!isEditing) {
-        this.pdfDocument.annotationStorage.resetModifiedIds();
-      }
-      // We need to cleanup whatever pages being rendered.
-      this.cleanup();
-      for (const pageView of this._pages) {
-        pageView.toggleEditingMode(isEditing);
-      }
-      // We must call #switchToEditAnnotationMode unconditionally to ensure that
-      // page is rendered if it's useful or not.
-      const idsToRefresh = this.#switchToEditAnnotationMode();
-      if (isEditing && idsToRefresh) {
-        // We're editing so we must switch to editing mode when the rendering is
-        // done.
-        this.#cleanupSwitchAnnotationEditorMode();
-        this.#switchAnnotationEditorModeAC = new AbortController();
-        const signal = AbortSignal.any([
-          this.#eventAC.signal,
-          this.#switchAnnotationEditorModeAC.signal,
-        ]);
-
-        eventBus.on(
-          "pagerendered",
-          ({ pageNumber }) => {
-            idsToRefresh.delete(pageNumber);
-            if (idsToRefresh.size === 0) {
-              this.#switchAnnotationEditorModeTimeoutId = setTimeout(
-                updater,
-                0
-              );
-            }
-          },
-          { signal, ...internalOpt }
-        );
-        return;
-      }
-    }
-    updater();
   }
 
   refresh(noUpdate = false, updateArgs = Object.create(null)) {

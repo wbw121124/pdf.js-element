@@ -44,9 +44,20 @@ const MIME_TYPES = {
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
 class WebServer {
-  constructor({ root, host, port, cacheExpirationTime, coverageEnabled }) {
+  constructor({
+    root,
+    host,
+    port,
+    cacheExpirationTime,
+    coverageEnabled,
+    aliases,
+  }) {
     const cwdURL = pathToFileURL(process.cwd()) + "/";
     this.rootURL = new URL(`${root || "."}/`, cwdURL);
+    // Map of URL prefixes to alternative filesystem locations, relative to
+    // the server root; used e.g. to serve the `<pdf-viewer-element>` demo
+    // (which lives in `build/`) under a stable URL.
+    this.aliases = aliases || Object.create(null);
     this.host = host || "localhost";
     this.port = port || 0;
     this.server = null;
@@ -122,7 +133,16 @@ class WebServer {
   }
 
   async #checkRequest(request, response, url) {
-    const localURL = new URL(`.${url.pathname}`, this.rootURL);
+    let localURL = new URL(`.${url.pathname}`, this.rootURL);
+    for (const [prefix, target] of Object.entries(this.aliases)) {
+      if (url.pathname.startsWith(prefix)) {
+        localURL = new URL(
+          `${target}${url.pathname.slice(prefix.length)}`,
+          this.rootURL
+        );
+        break;
+      }
+    }
 
     // Check if the file/folder exists.
     try {

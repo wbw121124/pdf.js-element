@@ -53,30 +53,30 @@
   --pages-selected-icon: url(images/pages_selected.svg);
   --spinner-icon: url(images/altText_spinner.svg);
 
-  --sidebar-bg-color: light-dark(rgb(255 255 255 / 0.92), rgb(66 65 77 / 0.92));
+  --sidebar-bg-color: light-dark(rgb(255 255 255 / 0.92), rgb(37 37 38 / 0.92));
   --sidebar-backdrop-filter: blur(7px);
   --sidebar-width: 230px;
   --sidebar-min-width: min-content;
   --sidebar-max-width: 50vw;
   --sidebar-block-padding: 8px;
 
-  --views-text-color: var(--text-color, light-dark(#15141a, #fbfbfe));
+  --views-text-color: var(--text-color, light-dark(#15141a, #d4d4d4));
   --button-fg: var(--views-text-color);
   --button-no-bg: var(--button-background-color-toolbar, transparent);
   --button-bg: var(
     --button-background-color,
-    light-dark(rgb(21 20 26 / 0.07), rgb(251 251 254 / 0.07))
+    light-dark(rgb(21 20 26 / 0.07), #3c3c3c)
   );
   --views-button-border-color: var(--button-border-color, transparent);
   --button-hover-bg: var(
     --button-background-color-hover,
-    light-dark(rgb(21 20 26 / 0.14), rgb(251 251 254 / 0.14))
+    light-dark(rgb(21 20 26 / 0.14), #4d4d4d)
   );
   --button-hover-fg: var(--views-text-color);
   --button-hover-border-color: var(--views-button-border-color);
   --button-active-bg: var(
     --button-background-color-active,
-    light-dark(rgb(21 20 26 / 0.21), rgb(251 251 254 / 0.21))
+    light-dark(rgb(21 20 26 / 0.21), #5a5a5a)
   );
   --button-active-fg: var(--views-text-color);
   --button-active-border-color: var(--views-button-border-color);
@@ -91,47 +91,44 @@
   );
   --button-focus-border-color: light-dark(white, black);
   --status-border-color: transparent;
-  --status-actions-bg: light-dark(
-    rgb(21 20 26 / 0.03),
-    rgb(251 251 254 / 0.03)
-  );
+  --status-actions-bg: light-dark(rgb(21 20 26 / 0.03), #2e2e2e);
   --status-undo-bg: light-dark(rgb(0 98 250 / 0.08), rgb(0 202 219 / 0.08));
   --status-waiting-bg: var(--status-undo-bg);
   --indicator-color: var(--color-accent-primary, light-dark(#0062fa, #00cadb));
   --status-warning-bg: light-dark(#ffe8ea, #6e001f);
   --indicator-warning-color: light-dark(#b20037, #ffa0aa);
   --header-shadow:
-    0 0.25px 0.75px -0.75px light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.2)),
-    0 2px 6px -6px light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.4));
-  --header-bg: light-dark(rgb(255 255 255 / 0.92), #42414e);
+    0 0.25px 0.75px -0.75px light-dark(rgb(0 0 0 / 0.05), #454545),
+    0 2px 6px -6px light-dark(rgb(0 0 0 / 0.1), #3f3f3f);
+  --header-bg: light-dark(rgb(255 255 255 / 0.92), #252526);
   --image-outline: none;
   --image-border-width: 6px;
-  --image-border-color: light-dark(#cfcfd8, #3a3944);
+  --image-border-color: light-dark(#cfcfd8, #3f3f3f);
   --image-hover-border-color: #bfbfc9;
   --image-current-border-color: var(--button-focus-outline-color);
   --image-current-focused-outline-color: var(--image-hover-border-color);
-  --image-page-number-bg: light-dark(#f0f0f4, #42414d);
+  --image-page-number-bg: light-dark(#f0f0f4, #252526);
   --image-page-number-fg: var(--views-text-color);
   --image-page-number-border-color: transparent;
   --image-hover-page-number-bg: var(--image-page-number-bg);
   --image-hover-page-number-fg: var(--image-page-number-fg);
   --image-current-page-number-bg: var(--image-current-border-color);
-  --image-current-page-number-fg: light-dark(#fff, #15141a);
+  --image-current-page-number-fg: light-dark(#fff, #fff);
   --image-current-hover-page-number-bg: var(--image-current-page-number-bg);
   --image-current-hover-page-number-fg: var(--image-current-page-number-fg);
   --image-shadow:
-    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.2)),
+    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), #454545),
     0 0 0 1px var(--image-border-color),
-    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.4));
+    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), #3f3f3f);
   --image-hover-shadow:
-    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.2)),
-    0 0 0 1px light-dark(rgb(21 20 26 / 0.1), rgb(251 251 254 / 0.1)),
+    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), #454545),
+    0 0 0 1px light-dark(rgb(21 20 26 / 0.1), #454545),
     0 0 0 var(--image-border-width) var(--image-hover-border-color),
-    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.4));
+    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), #3f3f3f);
   --image-current-shadow:
-    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.2)),
+    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), #454545),
     0 0 0 var(--image-border-width) var(--image-current-border-color),
-    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.4));
+    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), #3f3f3f);
   --image-dragging-placeholder-bg: light-dark(
     rgb(0 98 250 / 0.08),
     rgb(0 202 219 / 0.08)
@@ -147,7 +144,7 @@
   --image-dragging-shadow: 0 0 0 var(--image-border-width)
     var(--image-current-border-color);
   --multiple-dragging-indicator-bg: var(--indicator-color);
-  --multiple-dragging-text-color: light-dark(#fbfbfe, #15141a);
+  --multiple-dragging-text-color: light-dark(#fbfbfe, #fff);
 
   @media screen and (forced-colors: active) {
     --views-text-color: var(--text-color, CanvasText);
@@ -439,179 +436,6 @@
         font: menu;
         font-size: 13px;
       }
-
-      #viewsManagerStatusAction {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        align-self: stretch;
-        background-color: var(--status-actions-bg);
-
-        #viewsManagerStatusActionLabelContainer > button {
-          position: relative;
-          width: var(--icon-size);
-          height: var(--icon-size);
-          border: none;
-          padding: 0;
-          flex: 0 0 auto;
-
-          &::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            mask-repeat: no-repeat;
-            mask-position: center;
-            background-color: var(--indicator-color);
-            mask-image: var(--pages-selected-icon);
-          }
-
-          @media screen and (forced-colors: active) {
-            border-radius: 2px;
-            background-color: var(--button-bg);
-
-            &::before {
-              background-color: var(--button-fg);
-            }
-            &:hover {
-              background-color: var(--button-hover-bg);
-
-              &::before {
-                background-color: var(--button-hover-fg);
-              }
-            }
-            &:active {
-              background-color: var(--button-active-bg);
-
-              &::before {
-                background-color: var(--button-active-fg);
-              }
-            }
-          }
-
-          &#viewsManagerStatusActionDeselectButton:focus-visible {
-            outline: 2px solid var(--button-focus-outline-color);
-            border: 1px solid var(--button-focus-border-color);
-            border-radius: 2px;
-            outline-offset: 1px;
-          }
-        }
-
-        #actionSelector {
-          height: 32px;
-          min-width: 115px;
-          width: auto;
-          display: block;
-
-          #viewsManagerStatusActionButton {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            width: 100%;
-            height: 100%;
-            padding: 4px 16px;
-
-            &::after {
-              content: "";
-              display: inline-block;
-              width: var(--icon-size);
-              height: var(--icon-size);
-              mask-repeat: no-repeat;
-              mask-position: center;
-              mask-image: var(--manage-button-icon);
-              background-color: var(--button-fg);
-            }
-
-            &:hover::after {
-              background-color: var(--button-hover-fg) !important;
-            }
-
-            &:active::after {
-              background-color: var(--button-active-fg) !important;
-            }
-          }
-
-          > .popupMenu {
-            width: 100%;
-            min-width: fit-content;
-            z-index: 1;
-          }
-        }
-      }
-
-      #viewsManagerStatusUndo {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        align-self: stretch;
-        background-color: var(--status-undo-bg);
-
-        > span::before {
-          content: "";
-          display: inline-block;
-          width: var(--icon-size);
-          height: var(--icon-size);
-          mask-repeat: no-repeat;
-          mask-position: center;
-          mask-image: var(--undo-label-icon);
-          background-color: var(--indicator-color);
-        }
-
-        > div {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          width: auto;
-
-          #viewsManagerStatusUndoButton {
-            width: auto;
-            min-height: 24px;
-            padding: 4px 8px;
-          }
-        }
-      }
-
-      #viewsManagerStatusWarning {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: var(--status-warning-bg);
-
-        > span {
-          align-items: flex-start;
-
-          &::before {
-            content: "";
-            display: inline-block;
-            width: var(--icon-size);
-            height: var(--icon-size);
-            mask-repeat: no-repeat;
-            mask-position: center;
-            background-color: var(--indicator-warning-color);
-            mask-image: var(--undo-label-icon);
-            flex: 0 0 auto;
-          }
-        }
-      }
-
-      #viewsManagerStatusWaiting {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: var(--status-waiting-bg);
-
-        > span::before {
-          content: "";
-          display: inline-block;
-          width: var(--icon-size);
-          height: var(--icon-size);
-          mask-repeat: no-repeat;
-          mask-position: center;
-          background-color: var(--indicator-color);
-          mask-image: var(--spinner-icon);
-          flex: 0 0 auto;
-        }
-      }
     }
   }
 
@@ -620,13 +444,8 @@
     flex: 1 1 0%;
     overflow: auto;
 
-    &:has(#thumbnailsView.isDragging) {
-      overflow-x: hidden;
-    }
-
     #thumbnailsView {
       --thumbnail-width: 126px;
-      --gap-between-input-and-thumbnail: 16px;
 
       display: flex;
       flex-flow: row wrap;
@@ -638,91 +457,17 @@
       box-sizing: border-box;
       position: relative;
 
-      &.isDragging {
-        cursor: grabbing;
-
-        > .thumbnail {
-          > .thumbnailImageContainer:hover {
-            cursor: grabbing;
-
-            &:not([aria-current="page"]) {
-              box-shadow: var(--image-shadow);
-            }
-          }
-
-          > input {
-            pointer-events: none;
-          }
-        }
-      }
-
-      &.isDragging > .dragMarker,
-      &.isDraggingFile > .dragMarker {
-        position: absolute;
-        top: 0;
-        left: 0;
-        border: 2px solid var(--indicator-color);
-        contain: strict;
-      }
-
-      &.pasteMode {
-        gap: var(--gap-between-input-and-thumbnail);
-
-        > .thumbnail {
-          flex-direction: column;
-
-          > input {
-            display: none;
-          }
-
-          > .thumbnailPasteButton {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 16px;
-            min-height: 24px;
-            padding: 4px 16px;
-
-            font: menu;
-            font-size: 13px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: normal;
-          }
-        }
-      }
-
-      &:not(.pasteMode) > .thumbnail > .thumbnailPasteButton {
-        display: none;
-      }
-
       > .thumbnail {
-        --input-dim: 16px;
-
-        &:not(&:has(input)) {
-          --input-dim: 0px;
-          --gap-between-input-and-thumbnail: 0px;
-        }
-
         display: inline-flex;
         justify-content: flex-end;
         align-items: center;
         flex-direction: row-reverse;
-        gap: var(--gap-between-input-and-thumbnail);
-        width: calc(
-          var(--thumbnail-width) + 2 *
-            (var(--input-dim) + var(--gap-between-input-and-thumbnail))
-        );
+        width: var(--thumbnail-width);
         height: auto;
         position: relative;
         scroll-margin-top: 20px;
 
-        .thumbnailPasteButton {
-          padding: 8px 0;
-          text-align: center;
-        }
-
-        &:not(.isDragging) > .thumbnailImageContainer::after {
+        > .thumbnailImageContainer::after {
           content: attr(page-number);
           border-radius: 8px;
           border: 1px solid var(--image-page-number-border-color);
@@ -747,27 +492,13 @@
           user-select: none;
         }
 
-        &:has([aria-current="page"]):not(.isDragging)
-          > .thumbnailImageContainer::after {
+        &:has([aria-current="page"]) > .thumbnailImageContainer::after {
           background-color: var(--image-current-page-number-bg);
           color: var(--image-current-page-number-fg);
           outline: 1px solid var(--image-current-border-color);
         }
 
-        &.isDragging > input {
-          visibility: hidden;
-        }
-
-        > input {
-          margin: 0;
-          width: var(--input-dim);
-          height: var(--input-dim);
-          accent-color: var(--indicator-color);
-        }
-
         > .thumbnailImageContainer {
-          --thumbnail-dragging-scale: 1.4;
-
           width: var(--thumbnail-width);
           border: none;
           border-radius: 8px;
@@ -876,78 +607,14 @@
               }
             }
           }
-
-          &.placeholder {
-            background-color: var(--image-dragging-placeholder-bg);
-            box-shadow: none !important;
-            outline: var(--image-dragging-placeholder-border);
-          }
-
-          &.draggingThumbnail {
-            position: absolute;
-            left: 0;
-            top: 0;
-            z-index: 1;
-            transform-origin: 0 0 0;
-            scale: calc(1 / var(--thumbnail-dragging-scale));
-            pointer-events: none;
-            box-shadow: var(--image-dragging-shadow);
-
-            &.multiple {
-              box-shadow: var(--image-multiple-dragging-shadow);
-
-              @media screen and (forced-colors: active) {
-                forced-color-adjust: none;
-                box-shadow: var(--image-multiple-dragging-shadow);
-              }
-
-              > .thumbnailImageContainer {
-                position: absolute;
-                top: 0;
-                left: 0;
-
-                width: var(--thumbnail-width);
-                border: none;
-                border-radius: 8px;
-                box-sizing: content-box;
-                outline: none;
-                user-select: none;
-              }
-
-              &::after {
-                content: attr(data-multiple-count);
-                border-radius: calc(8px * var(--thumbnail-dragging-scale));
-                background-color: var(--multiple-dragging-indicator-bg);
-                color: var(--multiple-dragging-text-color);
-                position: absolute;
-                inset-block-end: calc(4px * var(--thumbnail-dragging-scale));
-                inset-inline-start: calc(4px * var(--thumbnail-dragging-scale));
-                min-width: calc(32px * var(--thumbnail-dragging-scale));
-                height: calc(16px * var(--thumbnail-dragging-scale));
-                text-align: center;
-                font: menu;
-                font-size: calc(13px * var(--thumbnail-dragging-scale));
-                font-style: normal;
-                font-weight: 400;
-                line-height: normal;
-                contain: strict;
-              }
-            }
-          }
         }
       }
     }
 
     #attachmentsView {
-      --attachment-color: light-dark(rgb(0 0 0 / 0.8), rgb(255 255 255 / 0.8));
-      --attachment-bg-color: light-dark(
-        rgb(0 0 0 / 0.15),
-        rgb(255 255 255 / 0.15)
-      );
-      --attachment-hover-color: light-dark(
-        rgb(0 0 0 / 0.9),
-        rgb(255 255 255 / 0.9)
-      );
+      --attachment-color: light-dark(rgb(0 0 0 / 0.8), #ccc);
+      --attachment-bg-color: light-dark(rgb(0 0 0 / 0.15), #04395e);
+      --attachment-hover-color: light-dark(rgb(0 0 0 / 0.9), #e6e6e6);
 
       > ul {
         list-style-type: none;

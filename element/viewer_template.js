@@ -1,119 +1,28 @@
-<!doctype html>
-<!--
-Copyright 2012 Mozilla Foundation
+/* Copyright 2026 wbw121124
+ *
+ * This file is generated from `web/viewer.html` by the `gulp element` target,
+ * and contains the (trimmed) viewer markup used by the
+ * `<pdf-viewer-element>` Custom Element.
+ *
+ * NOTE: The text is *not* a complete document, but the markup of the viewer
+ * body. The `id` attributes are transformed to instance-specific ids and
+ * corresponding CSS classes (used for styling multiple instances) by the
+ * Custom Element implementation itself.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Adobe CMap resources are covered by their own copyright but the same license:
-
-    Copyright 1990-2015 Adobe Systems Incorporated.
-
-See https://github.com/adobe-type-tools/cmap-resources
--->
-<html dir="ltr" mozdisallowselectionprint>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <!--#if GENERIC || CHROME-->
-    <meta name="google" content="notranslate" />
-    <!--#endif-->
-    <title>PDF.js viewer</title>
-
-    <!--#if MOZCENTRAL-->
-    <!--<link rel="icon" type="image/svg+xml" href="chrome://global/skin/icons/pdf.svg" />-->
-    <!--<meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src resource: 'wasm-unsafe-eval'; worker-src resource:; style-src resource: chrome:; img-src resource: blob: data:; media-src blob:; font-src resource:; connect-src resource:; base-uri 'none'; form-action 'none';"
-    />-->
-    <!--#elif TESTING-->
-    <!--<meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; media-src blob:; font-src 'self' data:; connect-src * blob: data:; base-uri 'self'; form-action 'none';"
-    />-->
-    <!--#elif CHROME-->
-    <!--<meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; media-src blob:; font-src 'self' data:; connect-src * file: chrome-extension: blob: data: filesystem: drive:; base-uri 'self'; form-action 'none';"
-    />-->
-    <!--#else-->
-    <!--<meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; media-src blob:; font-src 'self' data:; connect-src * blob: data:; base-uri 'none'; form-action 'none';"
-    />-->
-    <!--#endif-->
-
-    <!--#if MOZCENTRAL-->
-    <!--#include viewer-snippet-firefox-extension.html-->
-    <!--#elif CHROME-->
-    <!--#include viewer-snippet-chrome-extension.html-->
-    <!--#else-->
-    <!--#include viewer-snippet.html-->
-    <!--#endif-->
-
-    <!--#if MOZCENTRAL-->
-    <!--<link rel="stylesheet" href="resource://pdf.js/web/viewer.css">-->
-    <!--<link rel="localization" href="toolkit/pdfviewer/viewer.ftl"/>-->
-    <!--#else-->
-    <link rel="stylesheet" href="viewer.css" />
-    <!--#endif-->
-
-    <!--#if MOZCENTRAL-->
-    <!--<script src="resource://pdf.js/web/viewer.mjs" type="module"></script>-->
-
-    <!--<script src="resource://pdf.js/pdfFeaturesNotification.mjs" type="module"></script>-->
-    <!--#elif !MOZCENTRAL-->
-    <!--<script src="viewer.mjs" type="module"></script>-->
-    <!--#elif /* Development mode. */-->
-    <link rel="resource" type="application/l10n" href="locale/locale.json" />
-
-    <script type="importmap">
-      {
-        "imports": {
-          "pdfjs/": "../src/",
-          "pdfjs-lib": "../src/pdf.js",
-          "pdfjs-web/": "./",
-
-          "fluent-bundle": "../node_modules/@fluent/bundle/esm/index.js",
-          "fluent-dom": "../node_modules/@fluent/dom/esm/index.js",
-          "cached-iterable": "../node_modules/cached-iterable/src/index.mjs",
-
-          "display-binary_data_factory": "../src/display/binary_data_factory.js",
-          "display-network_stream": "../src/display/network_stream.js",
-          "display-node_utils": "../src/display/stubs.js",
-
-          "web-download_manager": "./download_manager.js",
-          "web-external_services": "./genericcom.js",
-          "web-null_l10n": "./genericl10n.js",
-          "web-pdf_attachment_viewer": "./pdf_attachment_viewer.js",
-          "web-pdf_cursor_tools": "./pdf_cursor_tools.js",
-          "web-pdf_document_properties": "./pdf_document_properties.js",
-          "web-pdf_find_bar": "./pdf_find_bar.js",
-          "web-pdf_layer_viewer": "./pdf_layer_viewer.js",
-          "web-pdf_outline_viewer": "./pdf_outline_viewer.js",
-          "web-pdf_presentation_mode": "./pdf_presentation_mode.js",
-          "web-pdf_thumbnail_viewer": "./pdf_thumbnail_viewer.js",
-          "web-preferences": "./genericcom.js",
-          "web-secondary_toolbar": "./secondary_toolbar.js",
-          "web-toolbar": "./toolbar.js",
-          "web-views_manager": "./views_manager.js"
-        }
-      }
-    </script>
-    <script src="viewer.js" type="module"></script>
-    <!--#endif-->
-  </head>
-
-  <body tabindex="0">
+const viewerHtml = `
     <div id="outerContainer">
       <span id="viewer-alert" class="visuallyHidden" role="alert"></span>
 
@@ -335,21 +244,14 @@ See https://github.com/adobe-type-tools/cmap-resources
                   </button>
                   <div id="secondaryToolbar" class="hidden doorHangerRight menu">
                     <div id="secondaryToolbarButtonContainer" class="menuContainer">
-                      <!--#if GENERIC-->
                       <button id="secondaryOpenFile" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-open-file-button">
                         <span data-l10n-id="pdfjs-open-file-button-label"></span>
                       </button>
-                      <!--#endif-->
 
                       <div class="visibleMediumView">
-                        <!--#if !GENERIC-->
-                        <!--            <div class="horizontalToolbarSeparator"></div>-->
-                        <!--#endif-->
                       </div>
 
-                      <!--#if GENERIC-->
                       <div class="horizontalToolbarSeparator"></div>
-                      <!--#endif-->
 
                       <button id="presentationMode" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-presentation-mode-button">
                         <span data-l10n-id="pdfjs-presentation-mode-button-label"></span>
@@ -529,10 +431,6 @@ See https://github.com/adobe-type-tools/cmap-resources
           </div>
         </div>
 
-        <!--#if MOZCENTRAL-->
-        <!--<pdf-features-notification id="pdfFeaturesNotification" data-focus-target="#viewerContainer" hidden></pdf-features-notification>-->
-        <!--#endif-->
-
         <div id="viewerContainer" tabindex="0">
           <div id="viewer" class="pdfViewer"></div>
         </div>
@@ -619,14 +517,10 @@ See https://github.com/adobe-type-tools/cmap-resources
           </div>
         </dialog>
 
-        <!--#if !MOZCENTRAL-->
-        <!--#endif-->
-        <!--#if CHROME-->
-        <!--#include viewer-snippet-chrome-overlays.html-->
-        <!--#endif-->
       </div>
       <!-- dialogContainer -->
     </div>
     <!-- outerContainer -->
-  </body>
-</html>
+`;
+
+export { viewerHtml };

@@ -1,223 +1,120 @@
-# PDF.js [![CI](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml/badge.svg?query=branch%3Amaster)](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml?query=branch%3Amaster) [![codecov](https://codecov.io/gh/mozilla/pdf.js/branch/master/graph/badge.svg)](https://codecov.io/gh/mozilla/pdf.js)
+# PDF.js Viewer（定制版）
 
-[PDF.js](https://mozilla.github.io/pdf.js/) is a Portable Document Format (PDF) viewer that is built with HTML5.
+基于 [PDF.js](https://mozilla.github.io/pdf.js/) 定制的浏览器 PDF 查看器，只读浏览、无编辑功能。
 
-PDF.js is community-driven and supported by Mozilla. Our goal is to
-create a general-purpose, web standards-based platform for parsing and
-rendering PDFs.
+> 本项目在 Mozilla PDF.js 基础上做了大量裁剪与定制，详见 [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md)。
 
-## Contributing
+## 功能特性
 
-PDF.js is an open source project and always looking for more contributors. To
-get involved, visit:
+- 只读 PDF 浏览与渲染（核心、显示基于 PDF.js 原生实现）
+- 文本选择、文本搜索（Find）
+- 缩放、旋转、页面导航、演示模式
+- 侧边栏：缩略图（只读，无勾选/管理）、书签大纲、附件
+- 打开文件、定位到页（Bookmark）
+- 主题：VSCode Dark Plus 配色（默认深色）
 
-+ [Issue Reporting Guide](https://github.com/mozilla/pdf.js/blob/master/.github/CONTRIBUTING.md)
-+ [Code Contribution Guide](https://github.com/mozilla/pdf.js/wiki/Contributing)
-+ [Frequently Asked Questions](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions)
-+ [Good Beginner Bugs](https://github.com/mozilla/pdf.js/issues?q=is%3Aissue%20state%3Aopen%20label%3Agood-beginner-bug)
-+ [Projects](https://github.com/mozilla/pdf.js/projects)
+## 已移除的功能（不可用）
 
-Feel free to stop by our [Matrix room](https://chat.mozilla.org/#/room/#pdfjs:mozilla.org) for questions or guidance.
+- 所有编辑类功能：注释编辑器、签名、高亮、文本框、手绘、图章
+- 打印、保存/下载
+- 缩略图页面勾选（选择页面）
+- 页面管理：复制 / 剪切 / 删除 / 导出 / 合并 / 拖拽排序 / 粘贴模式
+- 结构修改（拆分、合并文档）相关的一切 UI 与代码
 
-## Getting Started
+详细说明见 [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md)。
 
-### Online demo
+## 环境要求
 
-Please note that the "Modern browsers" version assumes native support for the
-latest JavaScript features; please also see [this wiki page](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#faq-support).
+- Node.js（建议 LTS 版本，>= 18）
+- npm
+- 平台无关（本仓库在 Windows / Linux / macOS 均可构建）
 
-+ Modern browsers: https://mozilla.github.io/pdf.js/web/viewer.html
+## 安装
 
-+ Older browsers: https://mozilla.github.io/pdf.js/legacy/web/viewer.html
+```bash
+npm install
+```
 
-### Browser Extensions
+## 本地开发
 
-#### Firefox
+```bash
+npx gulp server
+```
 
-PDF.js is built into version 19+ of Firefox.
+打开 http://localhost:8888/web/viewer.html 即可访问查看器。
+测试 PDF 列表位于 http://localhost:8888/test/pdfs/?frame
+嵌入组件演示位于 http://localhost:8888/element/demo.html
 
-#### Chrome
+## 构建
 
-+ The official extension for Chrome can be installed from the [Chrome Web Store](https://chrome.google.com/webstore/detail/pdf-viewer/oemmndcbldboiebfnladdacbdfmadadm).
-*This extension is maintained by [@Rob--W](https://github.com/Rob--W).*
-+ Build Your Own - Get the code as explained below and issue `npx gulp chromium`. Then open
-Chrome, go to `Tools > Extension` and load the (unpackaged) extension from the
-directory `build/chromium`.
+### 构建现代浏览器版本（GENERIC）
 
-### PDF debugger
+```bash
+npx gulp generic
+```
 
-Browse the internal structure of a PDF document with https://mozilla.github.io/pdf.js/internal-viewer/web/debugger.html
+输出位于 `build/generic/`，产物为：
 
-## Getting the Code
+- `build/generic/build/pdf.mjs` — PDF.js 主库
+- `build/generic/build/pdf.worker.mjs` — Worker 线程脚本
+- `build/generic/web/` — 完整查看器应用
 
-To get a local copy of the current code, clone it using git:
+### 构建发行包（pdfjs-dist）
 
-    $ git clone https://github.com/mozilla/pdf.js.git
-    $ cd pdf.js
+```bash
+npx gulp dist
+```
 
-Next, install Node.js via the [official package](https://nodejs.org) or via
-[nvm](https://github.com/creationix/nvm). If everything worked out, install
-all dependencies for PDF.js:
+生成 `build/dist/`（包含通用、legacy、压缩、组件等全部产物）。
+最常用验证命令即为此。
 
-    $ npm install
+### 构建嵌入组件 `<pdf-viewer-element>`
 
-Finally, you need to start a local web server as some browsers do not allow opening
-PDF files using a `file://` URL. Run:
+```bash
+npx gulp element
+```
 
-    $ npx gulp server
+输出位于 `build/generic/element/`，演示页为
+`build/generic/element/demo.html`（同一页面可嵌入多个独立实例）。
+源码见 `element/`，使用说明见 [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md)。
 
-and then you can open:
+### 其他构建目标
 
-+ http://localhost:8888/web/viewer.html
+| 命令 | 说明 |
+| --- | --- |
+| `npx gulp lint` | 运行 ESLint 检查 |
+| `npx gulp typestest` | 运行 TypeScript 类型检查 |
+| `npx gulp unittest` | 运行单元测试（Jasmine） |
+| `npx gulp test` | 运行全部测试 |
 
-Please keep in mind that this assumes the latest version of Mozilla Firefox; refer to [Building PDF.js](https://github.com/mozilla/pdf.js/blob/master/README.md#building-pdfjs) for non-development usage of the PDF.js library.
+## 部署
 
-It is also possible to view all test PDF files on the right side by opening:
+把 `build/generic/` 目录完整部署到任意静态服务器即可，例如：
 
-+ http://localhost:8888/test/pdfs/?frame
+```bash
+# 示例：将构建产物复制到静态站点目录
+npx gulp generic
+cp -r build/generic/web /var/www/pdf-viewer
+```
 
-## Building PDF.js
+访问 `http://<your-host>/pdf-viewer/viewer.html?file=...`
 
-In order to bundle all `src/` files into two production scripts and build the generic
-viewer, run:
+## 通过 URL 参数加载文档
 
-    $ npx gulp generic
+查看器支持通过 `?file=` 参数指定 PDF 地址，例如：
 
-If you need to support older browsers, run:
+```
+http://localhost:8888/web/viewer.html?file=/path/to/doc.pdf
+http://localhost:8888/web/viewer.html?file=https%3A%2F%2Fexample.com%2Fdoc.pdf
+```
 
-    $ npx gulp generic-legacy
+更多参数（如 `#page=5`、`#zoom=page-width`、`#search=关键词`）与官方 PDF.js 保持一致。
 
-This will generate `pdf.js` and `pdf.worker.js` in the `build/generic/build/` directory (respectively `build/generic-legacy/build/`).
-Both scripts are needed but only `pdf.js` needs to be included since `pdf.worker.js` will
-be loaded by `pdf.js`. The PDF.js files are large and should be minified for production.
+## 文档
 
-## Code coverage
+- [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md) — 详细的定制与裁剪说明
+- 原版 [告示](../../../docs/contents/index.md) 或其他 PDF.js 文档参见官方仓库
 
-We track how much of the code is exercised by the test suite on
-[Codecov](https://codecov.io/gh/mozilla/pdf.js) (see the badge at the top of this
-file).
+## 许可
 
-### How it is collected
-
-When coverage is enabled, the build instruments the bundled code with
-[`babel-plugin-istanbul`](https://github.com/istanbuljs/babel-plugin-istanbul),
-which adds counters that record every line, branch and function that runs:
-
-+ For browser-based tests (unit, integration and reference tests) the
-  instrumented code runs in the browser, fills a global `window.__coverage__`
-  object, and the test runner collects it from each browser session, merges the
-  results, and writes the report.
-+ For the Node-based unit tests (`unittestcli`) the raw data is written to
-  `build/tmp/unittestcli-coverage.json` and turned into a report afterwards.
-
-### Collecting coverage locally
-
-Add the `--coverage` flag to any of the test tasks, for example:
-
-    $ npx gulp unittest --coverage           # browser unit tests
-    $ npx gulp unittestcli --coverage        # Node unit tests
-    $ npx gulp integrationtest --coverage    # Puppeteer integration tests
-    $ npx gulp botbrowsertest --coverage     # reference tests
-
-The following options control the output:
-
-| Option | Description | Default |
-| --- | --- | --- |
-| `--coverage` | Enable coverage collection. | off |
-| `--coverage-output <dir>` | Directory where the report is written. | `build/coverage` |
-| `--coverage-formats <list>` | Comma-separated list of formats: `info`, `html`, `json`, `text`, `cobertura`, `clover`. | `info` |
-| `--coverage-per-test` | Also build a per-test index (see below). | off |
-
-By default the report is written to `build/coverage` in the `info` format, i.e.
-an [LCOV](https://github.com/linux-test-project/lcov) `lcov.info` file (the same
-format that is uploaded to Codecov). Use `--coverage-formats html` to get a
-browsable HTML report instead, or pass several formats at once, e.g.
-`--coverage-formats info,html`.
-
-### Finding which tests cover a given line
-
-`coverage_search` lists the ref tests that exercised a specific source line or
-function. It uses the per-test index (`per-test-index.json`) that is rebuilt on
-every push to `master` and published to the
-[`pdf.js.refs`](https://github.com/mozilla/pdf.js.refs/tree/gh-pages)
-repository. The index is downloaded on demand, cached locally, and only
-re-downloaded when it has changed, so no local coverage build is required:
-
-    $ npx gulp coverage_search --code="canvas.js::205"
-    $ npx gulp coverage_search --code="canvas.js::drawImageAtIntegerCoords"
-
-To run — or regenerate the reference images for — only the ref tests that touch
-a given line or function, pass the same `--code` option to a browser test or
-`makeref` task:
-
-    $ npx gulp browsertest --code="canvas.js::205"
-    $ npx gulp makeref --code="canvas.js::205"
-
-Pass `--no-download` to reuse the locally cached index without contacting the
-network. The index can also be built and queried locally (the CI job that
-publishes it builds it the same way):
-
-    $ npx gulp botbrowsertest --coverage-per-test
-    $ npx gulp coverage_search --code="canvas.js::205" \
-        --index=build/coverage/per-test-index.json --no-download
-
-### Continuous integration
-
-On every push and pull request three GitHub Actions workflows collect coverage
-and upload it to Codecov, each tagged with its own Codecov *flag* so the test
-types can be told apart:
-
-| Workflow | Task | Codecov flag |
-| --- | --- | --- |
-| `unit_tests.yml` | `unittest` | `unittest` |
-| `integration_tests.yml` | `integrationtest` | `integrationtest` |
-| `coverage_browser_tests.yml` | `botbrowsertest` | `browsertest` |
-
-## Using PDF.js in a web application
-
-To use PDF.js in a web application you can choose to use a pre-built version of the library
-or to build it from source. We supply pre-built versions for usage with NPM under
-the `pdfjs-dist` name. For more information and examples please refer to the
-[wiki page](https://github.com/mozilla/pdf.js/wiki/Setup-pdf.js-in-a-website) on this subject.
-
-## Including via a CDN
-
-PDF.js is hosted on several free CDNs:
- - https://www.jsdelivr.com/package/npm/pdfjs-dist
- - https://cdnjs.com/libraries/pdf.js
- - https://unpkg.com/pdfjs-dist/
-
-## Learning
-
-You can play with the PDF.js API directly from your browser using the live demos below:
-
-+ [Interactive examples](https://mozilla.github.io/pdf.js/examples/index.html#interactive-examples)
-
-More examples can be found in the [examples folder](https://github.com/mozilla/pdf.js/tree/master/examples/). Some of them are using the pdfjs-dist package, which can be built and installed in this repo directory via `npx gulp dist-install` command.
-
-For an introduction to the PDF.js code, check out the presentation by our
-contributor Julian Viereck:
-
-+ https://www.youtube.com/watch?v=Iv15UY-4Fg8
-
-More learning resources can be found at:
-
-+ https://github.com/mozilla/pdf.js/wiki/Additional-Learning-Resources
-
-The API documentation can be found at:
-
-+ https://mozilla.github.io/pdf.js/api/
-
-## Questions
-
-Check out our FAQs and get answers to common questions:
-
-+ https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions
-
-Talk to us on Matrix:
-
-+ https://chat.mozilla.org/#/room/#pdfjs:mozilla.org
-
-File an issue:
-
-+ https://github.com/mozilla/pdf.js/issues/new/choose
+本定制版基于 Mozilla PDF.js，遵循 Apache License 2.0，详见 [LICENSE](https://github.com/mozilla/pdf.js/blob/master/LICENSE)。

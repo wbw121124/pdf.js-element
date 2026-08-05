@@ -115,18 +115,6 @@ class L10n {
     // Try to support "incompletely" specified language codes (see issue 13689).
     const PARTIAL_LANG_CODES = {
       en: "en-us",
-      es: "es-es",
-      fy: "fy-nl",
-      ga: "ga-ie",
-      gu: "gu-in",
-      hi: "hi-in",
-      hy: "hy-am",
-      nb: "nb-no",
-      ne: "ne-np",
-      nn: "nn-no",
-      pa: "pa-in",
-      pt: "pt-pt",
-      sv: "sv-se",
       zh: "zh-cn",
     };
     return PARTIAL_LANG_CODES[langCode] || langCode;

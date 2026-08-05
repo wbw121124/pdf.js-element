@@ -393,26 +393,10 @@ const defaultOptions = new Map([
     },
   ],
   [
-    "enableMerge",
-    {
-      /** @type {boolean} */
-      value: typeof PDFJSDev === "undefined" || PDFJSDev.test("TESTING"),
-      kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
-    },
-  ],
-  [
     "enableNewAltTextWhenAddingImage",
     {
       /** @type {boolean} */
       value: true,
-      kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
-    },
-  ],
-  [
-    "enableNewBadge",
-    {
-      /** @type {boolean} */
-      value: typeof PDFJSDev === "undefined" || PDFJSDev.test("MOZCENTRAL"),
       kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
     },
   ],
@@ -486,14 +470,6 @@ const defaultOptions = new Map([
       value:
         typeof PDFJSDev === "undefined" ||
         PDFJSDev.test("TESTING || MOZCENTRAL"),
-      kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
-    },
-  ],
-  [
-    "enableSplitMerge",
-    {
-      /** @type {boolean} */
-      value: typeof PDFJSDev === "undefined" || PDFJSDev.test("TESTING"),
       kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
     },
   ],
@@ -709,7 +685,7 @@ const defaultOptions = new Map([
     "viewerCssTheme",
     {
       /** @type {number} */
-      value: typeof PDFJSDev !== "undefined" && PDFJSDev.test("CHROME") ? 2 : 0,
+      value: 2,
       kind: OptionKind.VIEWER + OptionKind.PREFERENCE,
     },
   ],

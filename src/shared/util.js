@@ -77,30 +77,6 @@ const AnnotationEditorPrefix = "pdfjs_internal_editor_";
 const AnnotationEditorType = {
   DISABLE: -1,
   NONE: 0,
-  FREETEXT: 3,
-  HIGHLIGHT: 9,
-  STAMP: 13,
-  INK: 15,
-  POPUP: 16,
-  SIGNATURE: 101,
-  COMMENT: 102,
-};
-
-const AnnotationEditorParamsType = {
-  RESIZE: 1,
-  CREATE: 2,
-  FREETEXT_SIZE: 11,
-  FREETEXT_COLOR: 12,
-  FREETEXT_OPACITY: 13,
-  INK_COLOR: 21,
-  INK_THICKNESS: 22,
-  INK_OPACITY: 23,
-  INK_COLOR_AND_OPACITY: 24,
-  HIGHLIGHT_COLOR: 31,
-  HIGHLIGHT_THICKNESS: 32,
-  HIGHLIGHT_FREE: 33,
-  HIGHLIGHT_SHOW_ALL: 34,
-  DRAW_STEP: 41,
 };
 
 // Permission flags from Table 22, Section 7.6.3.2 of the PDF specification.
@@ -1168,7 +1144,6 @@ export {
   AbortException,
   AnnotationActionEventType,
   AnnotationBorderStyleType,
-  AnnotationEditorParamsType,
   AnnotationEditorPrefix,
   AnnotationEditorType,
   AnnotationFieldFlag,

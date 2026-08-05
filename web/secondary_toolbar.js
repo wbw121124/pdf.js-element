@@ -71,8 +71,6 @@ class SecondaryToolbar {
         eventName: "presentationmode",
         close: true,
       },
-      { element: options.printButton, eventName: "print", close: true },
-      { element: options.downloadButton, eventName: "download", close: true },
       { element: options.viewBookmarkButton, eventName: null, close: true },
       { element: options.firstPageButton, eventName: "firstpage", close: true },
       { element: options.lastPageButton, eventName: "lastpage", close: true },
@@ -138,11 +136,6 @@ class SecondaryToolbar {
         element: options.spreadEvenButton,
         eventName: "switchspreadmode",
         eventDetails: { mode: SpreadMode.EVEN },
-        close: true,
-      },
-      {
-        element: options.imageAltTextSettingsButton,
-        eventName: "imagealttextsettings",
         close: true,
       },
       {

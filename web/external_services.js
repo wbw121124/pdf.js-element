@@ -69,10 +69,6 @@ class BaseExternalServices {
     return null;
   }
 
-  updateEditorStates(data) {
-    throw new Error("Not implemented: updateEditorStates");
-  }
-
   dispatchGlobalEvent(_event) {}
 }
 

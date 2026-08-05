@@ -13,154 +13,26 @@
  * limitations under the License.
  */
 
-/** @typedef {import("../src/display/api").PDFPageProxy} PDFPageProxy */
-// eslint-disable-next-line max-len
-/** @typedef {import("../src/display/page_viewport").PageViewport} PageViewport */
-// eslint-disable-next-line max-len
-/** @typedef {import("../src/display/editor/tools.js").AnnotationEditorUIManager} AnnotationEditorUIManager */
-// eslint-disable-next-line max-len
-/** @typedef {import("./text_accessibility.js").TextAccessibilityManager} TextAccessibilityManager */
-// eslint-disable-next-line max-len
-/** @typedef {import("../src/display/annotation_layer.js").AnnotationLayer} AnnotationLayer */
-// eslint-disable-next-line max-len
-/** @typedef {import("../src/display/struct_tree_layer_builder.js").StructTreeLayerBuilder} StructTreeLayerBuilder */
-
-import { AnnotationEditorLayer } from "pdfjs-lib";
-import { GenericL10n } from "web-null_l10n";
-
-/**
- * @typedef {Object} AnnotationEditorLayerBuilderOptions
- * @property {AnnotationEditorUIManager} [uiManager]
- * @property {number} pageIndex
- * @property {L10n} [l10n]
- * @property {StructTreeLayerBuilder} [structTreeLayer]
- * @property {TextAccessibilityManager} [accessibilityManager]
- * @property {AnnotationLayer} [annotationLayer]
- * @property {TextLayer} [textLayer]
- * @property {DrawLayer} [drawLayer]
- * @property {function} [onAppend]
- */
-
-/**
- * @typedef {Object} AnnotationEditorLayerBuilderRenderOptions
- * @property {PageViewport} viewport
- * @property {string} [intent] - The default value is "display".
- */
-
+// Stub file - editor functionality removed
 class AnnotationEditorLayerBuilder {
-  #annotationLayer = null;
+  dispose() {}
 
-  #drawLayer = null;
+  async hide() {}
 
-  #onAppend = null;
+  async show() {}
 
-  #structTreeLayer = null;
+  async render() {}
 
-  #textLayer = null;
+  cancel() {}
 
-  #uiManager;
+  update() {}
 
-  /**
-   * @param {AnnotationEditorLayerBuilderOptions} options
-   */
-  constructor(options) {
-    this.pageIndex = options.pageIndex;
-    this.accessibilityManager = options.accessibilityManager;
-    this.l10n = options.l10n;
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-      this.l10n ||= new GenericL10n();
-    }
-    this.annotationEditorLayer = null;
-    this.div = null;
-    this._cancelled = false;
-    this.#uiManager = options.uiManager;
-    this.#annotationLayer = options.annotationLayer || null;
-    this.#textLayer = options.textLayer || null;
-    this.#drawLayer = options.drawLayer || null;
-    this.#onAppend = options.onAppend || null;
-    this.#structTreeLayer = options.structTreeLayer || null;
+  get div() {
+    return null;
   }
 
-  updatePageIndex(newPageIndex) {
-    this.pageIndex = newPageIndex;
-    this.annotationEditorLayer?.updatePageIndex(newPageIndex);
-  }
-
-  /**
-   * @param {AnnotationEditorLayerBuilderRenderOptions} options
-   * @returns {Promise<void>}
-   */
-  async render({ viewport, intent = "display" }) {
-    if (intent !== "display") {
-      return;
-    }
-
-    if (this._cancelled) {
-      return;
-    }
-
-    const clonedViewport = viewport.clone({ dontFlip: true });
-    if (this.div) {
-      this.annotationEditorLayer.update({ viewport: clonedViewport });
-      this.show();
-      return;
-    }
-
-    // Create an AnnotationEditor layer div
-    const div = (this.div = document.createElement("div"));
-    div.className = "annotationEditorLayer";
-    div.hidden = true;
-    div.dir = this.#uiManager.direction;
-    this.#onAppend?.(div);
-
-    this.annotationEditorLayer = new AnnotationEditorLayer({
-      uiManager: this.#uiManager,
-      div,
-      structTreeLayer: this.#structTreeLayer,
-      accessibilityManager: this.accessibilityManager,
-      pageIndex: this.pageIndex,
-      l10n: this.l10n,
-      viewport: clonedViewport,
-      annotationLayer: this.#annotationLayer,
-      textLayer: this.#textLayer,
-      drawLayer: this.#drawLayer,
-    });
-
-    const parameters = {
-      viewport: clonedViewport,
-      div,
-      annotations: null,
-      intent,
-    };
-
-    await this.annotationEditorLayer.render(parameters);
-    this.show();
-  }
-
-  cancel() {
-    this._cancelled = true;
-
-    if (!this.div) {
-      return;
-    }
-    this.annotationEditorLayer.destroy();
-  }
-
-  hide() {
-    if (!this.div) {
-      return;
-    }
-    this.annotationEditorLayer.pause(/* on */ true);
-    this.div.hidden = true;
-  }
-
-  show() {
-    if (!this.div || this.annotationEditorLayer.isInvisible) {
-      return;
-    }
-    this.div.hidden = false;
-    this.annotationEditorLayer.pause(/* on */ false);
+  get drawingSession() {
+    return null;
   }
 }
-
 export { AnnotationEditorLayerBuilder };

@@ -22,7 +22,7 @@
 
 :root {
   --sig-card-border: light-dark(rgb(228 228 232), rgb(82 82 86));
-  --sig-card-bg: var(--field-bg-color, light-dark(white, rgb(64 64 68)));
+  --sig-card-bg: var(--field-bg-color, light-dark(white, #3c3c3c));
   --sig-card-nested-bg: light-dark(rgb(252 252 253), rgb(72 72 76));
   --sig-row-color: light-dark(rgb(58 58 60), rgb(228 228 232));
   --sig-detail-color: light-dark(rgb(96 96 96), rgb(180 180 184));

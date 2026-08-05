@@ -22,22 +22,22 @@
 :root {
   --button-primary-bg-color: var(
     --button-background-color-primary,
-    light-dark(#0060df, #0df)
+    light-dark(#0060df, #3794ff)
   );
   --button-primary-fg-color: var(
     --button-text-color-primary,
-    light-dark(#fbfbfe, #15141a)
+    light-dark(#fbfbfe, #fff)
   );
   --button-primary-border-color: var(--button-primary-bg-color);
   --button-primary-active-bg-color: var(
     --button-background-color-primary-active,
-    light-dark(#054096, #aaf2ff)
+    light-dark(#054096, #9ce1ff)
   );
   --button-primary-active-fg-color: var(--button-primary-fg-color);
   --button-primary-active-border-color: var(--button-primary-active-bg-color);
   --button-primary-hover-bg-color: var(
     --button-background-color-primary-hover,
-    light-dark(#0250bb, #80ebff)
+    light-dark(#0250bb, #83c7ff)
   );
   --button-primary-hover-fg-color: var(--button-primary-fg-color);
   --button-primary-hover-border-color: var(--button-primary-hover-bg-color);
@@ -47,9 +47,9 @@
 
   --button-secondary-bg-color: var(
     --button-background-color,
-    light-dark(rgb(21 20 26 / 0.07), rgb(251 251 254 / 0.07))
+    light-dark(rgb(21 20 26 / 0.07), #3c3c3c)
   );
-  --button-secondary-fg-color: var(--text-color, light-dark(#15141a, #fbfbfe));
+  --button-secondary-fg-color: var(--text-color, light-dark(#15141a, #d4d4d4));
   /* Firefox's outline-style secondary button has a transparent fill and carries
      the edge on --button-border-color; the fallback matches the fill instead,
      since the shipped one is a translucent overlay. */
@@ -59,13 +59,13 @@
   );
   --button-secondary-active-bg-color: var(
     --button-background-color-active,
-    light-dark(rgb(21 20 26 / 0.21), rgb(251 251 254 / 0.21))
+    light-dark(rgb(21 20 26 / 0.21), #5a5a5a)
   );
   --button-secondary-active-fg-color: var(--button-secondary-fg-color);
   --button-secondary-active-border-color: var(--button-secondary-bg-color);
   --button-secondary-hover-bg-color: var(
     --button-background-color-hover,
-    light-dark(rgb(21 20 26 / 0.14), rgb(251 251 254 / 0.14))
+    light-dark(rgb(21 20 26 / 0.14), #4d4d4d)
   );
   --button-secondary-hover-fg-color: var(--button-secondary-fg-color);
   --button-secondary-hover-border-color: var(--button-secondary-hover-bg-color);

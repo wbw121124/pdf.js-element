@@ -38,19 +38,19 @@
   );
   --toggle-background-color-pressed: var(
     --color-accent-primary,
-    light-dark(#0060df, #0df)
+    light-dark(#0060df, #3794ff)
   );
   --toggle-background-color-pressed-hover: var(
     --color-accent-primary-hover,
-    light-dark(#0250bb, #80ebff)
+    light-dark(#0250bb, #83c7ff)
   );
   --toggle-background-color-pressed-active: var(
     --color-accent-primary-active,
-    light-dark(#054096, #aaf2ff)
+    light-dark(#054096, #9ce1ff)
   );
   --toggle-border-color: var(
     --border-color-interactive,
-    light-dark(#8f8f9d, #f9f9fa)
+    light-dark(#8f8f9d, #d4d4d4)
   );
   --toggle-border-color-hover: var(--toggle-border-color);
   --toggle-border-color-active: var(--toggle-border-color);
@@ -63,7 +63,7 @@
   --toggle-dot-background-color-active: var(--toggle-dot-background-color);
   --toggle-dot-background-color-on-pressed: var(
     --background-color-canvas,
-    light-dark(white, #1c1b22)
+    light-dark(white, #252526)
   );
   --toggle-dot-margin: 1px;
   --toggle-dot-height: calc(

@@ -90,17 +90,13 @@ class ViewsManager extends Sidebar {
       outlinesView,
       attachmentsView,
       layersView,
-      viewsManagerAddFile: { button: viewsManagerAddFileButton },
       viewsManagerCurrentOutlineButton,
       viewsManagerSelectorButton,
       viewsManagerSelectorOptions,
       viewsManagerHeaderLabel,
-      viewsManagerStatus,
     },
     eventBus,
     l10n,
-    enableMerge = false,
-    enableSplitMerge = false,
     globalAbortSignal,
   }) {
     super(
@@ -140,21 +136,10 @@ class ViewsManager extends Sidebar {
     this.attachmentsView = attachmentsView;
     this.layersView = layersView;
 
-    this.viewsManagerAddFileButton = viewsManagerAddFileButton;
     this.viewsManagerCurrentOutlineButton = viewsManagerCurrentOutlineButton;
     this.viewsManagerHeaderLabel = viewsManagerHeaderLabel;
-    this.viewsManagerStatus = viewsManagerStatus;
 
     this.eventBus = eventBus;
-
-    if (!enableSplitMerge) {
-      viewsManagerStatus.hidden = true;
-    }
-    this._enableSplitMerge = enableSplitMerge;
-    this._enableMerge = enableMerge;
-    if (!enableMerge) {
-      viewsManagerAddFileButton.hidden = true;
-    }
 
     this.menu = new Menu(
       viewsManagerSelectorOptions,
@@ -266,10 +251,6 @@ class ViewsManager extends Sidebar {
         return;
     }
 
-    this.viewsManagerStatus.hidden =
-      !this._enableSplitMerge || view !== SidebarView.THUMBS;
-    this.viewsManagerAddFileButton.hidden =
-      !this._enableMerge || view !== SidebarView.THUMBS;
     this.viewsManagerCurrentOutlineButton.hidden = view !== SidebarView.OUTLINE;
     this.viewsManagerHeaderLabel.setAttribute(
       "data-l10n-id",
@@ -535,7 +516,12 @@ class ViewsManager extends Sidebar {
   }
 
   onResizing(newWidth) {
-    docStyle.setProperty(SIDEBAR_WIDTH_VAR, `${newWidth}px`);
+    // In the `<pdf-viewer-element>` context the property must be set on the
+    // instance root, to avoid clobbering the value of other instances (or
+    // the standalone viewer) on the same page.
+    const style =
+      this.outerContainer.closest(".pdfjs-element")?.style ?? docStyle;
+    style.setProperty(SIDEBAR_WIDTH_VAR, `${newWidth}px`);
   }
 }
 

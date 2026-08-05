@@ -47,15 +47,15 @@ button.hasPopupMenu {
   );
   --menuitem-focus-border-color: light-dark(white, black);
 
-  --menu-bg: var(--background-color-box, light-dark(white, #23222b));
+  --menu-bg: var(--background-color-box, light-dark(white, #252526));
   --menu-background-blend-mode: normal;
   --menu-box-shadow:
-    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.2)),
-    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.4));
-  --menu-border-color: light-dark(rgb(21 20 26 / 0.1), rgb(251 251 254 / 0.1));
+    0 0.375px 1.5px 0 light-dark(rgb(0 0 0 / 0.05), #454545),
+    0 3px 12px 0 light-dark(rgb(0 0 0 / 0.1), #3f3f3f);
+  --menu-border-color: light-dark(rgb(21 20 26 / 0.1), #454545);
   --menuitem-border-radius: 8px;
   --menu-backdrop-filter: none;
-  --menu-text-color: var(--text-color, light-dark(#15141a, #fbfbfe));
+  --menu-text-color: var(--text-color, light-dark(#15141a, #d4d4d4));
   --menu-text-disabled-color: var(--menu-text-color);
   --menuitem-text-hover-fg: var(--menu-text-color);
   --menuitem-hover-bg: color-mix(

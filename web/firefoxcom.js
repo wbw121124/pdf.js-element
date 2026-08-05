@@ -184,20 +184,6 @@ class Preferences extends BasePreferences {
   window.addEventListener("save", handleEvent);
 })();
 
-(function listenEditingEvent() {
-  const handleEvent = function ({ detail }) {
-    if (!viewerApp.initialized) {
-      return;
-    }
-    viewerApp.eventBus.dispatch("editingaction", {
-      source: window,
-      name: detail.name,
-    });
-  };
-
-  window.addEventListener("editingaction", handleEvent);
-})();
-
 if (PDFJSDev.test("GECKOVIEW")) {
   (function listenQueryEvents() {
     window.addEventListener("pdf.js.query", async ({ detail: { queryId } }) => {
@@ -743,10 +729,6 @@ class ExternalServices extends BaseExternalServices {
 
   reportText(data) {
     FirefoxCom.request("reportText", data);
-  }
-
-  updateEditorStates(data) {
-    FirefoxCom.request("updateEditorStates", data);
   }
 
   async createL10n() {

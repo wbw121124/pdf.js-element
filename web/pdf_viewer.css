@@ -34,7 +34,6 @@
 @import url(annotation_layer_builder.css);
 @import url(xfa_layer_builder.css);
 /* Ignored in GECKOVIEW: begin */
-@import url(annotation_editor_layer_builder.css);
 @import url(menu.css);
 @import url(tree.css);
 @import url(views_manager.css);
@@ -50,15 +49,15 @@
   --page-border: 9px solid transparent;
   --spreadHorizontalWrapped-margin-LR: -3.5px;
   --loading-icon-delay: 400ms;
-  --focus-ring-color: var(--focus-outline-color, light-dark(#0060df, #0df));
+  --focus-ring-color: var(--focus-outline-color, light-dark(#0060df, #3794ff));
   --focus-ring-outline: var(--focus-outline-width, 2px) solid
     var(--focus-ring-color);
-  --text-primary-color: var(--text-color, light-dark(#15141a, #fbfbfe));
-  --link-fg-color: var(--link-color, light-dark(#0060df, #0df));
-  --link-hover-fg-color: var(--link-color-hover, light-dark(#0250bb, #80ebff));
+  --text-primary-color: var(--text-color, light-dark(#15141a, #d4d4d4));
+  --link-fg-color: var(--link-color, light-dark(#0060df, #3794ff));
+  --link-hover-fg-color: var(--link-color-hover, light-dark(#0250bb, #83c7ff));
   --new-badge-bg: light-dark(#070, #37b847);
-  --new-badge-color: light-dark(#fff, #15141a);
-  --new-badge-border-color: light-dark(#fbfbfe / 40%, #15141a / 40%);
+  --new-badge-color: light-dark(#fff, #fff);
+  --new-badge-border-color: light-dark(#fbfbfe / 40%, #fff / 40%);
 
   @media screen and (forced-colors: active) {
     --pdfViewer-padding-bottom: 9px;

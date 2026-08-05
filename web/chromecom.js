@@ -20,10 +20,9 @@ import { BasePreferences } from "./preferences.js";
 import { DownloadManager as GenericDownloadManager } from "./download_manager.js";
 import { GenericL10n } from "./genericl10n.js";
 import { GenericScripting } from "./generic_scripting.js";
-import { SignatureStorage } from "./generic_signature_storage.js";
 
 // These strings are from chrome/app/resources/generated_resources_*.xtb.
-// eslint-disable-next-line sort-imports
+
 import i18nFileAccessLabels from "./chrome-i18n-allow-access-to-file-urls.json" with { type: "json" };
 
 if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("CHROME")) {
@@ -442,10 +441,6 @@ class ExternalServices extends BaseExternalServices {
       AppOptions.get("sandboxBundleSrc"),
       AppOptions.get("wasmUrl")
     );
-  }
-
-  createSignatureStorage(eventBus, signal) {
-    return new SignatureStorage(eventBus, signal);
   }
 }
 

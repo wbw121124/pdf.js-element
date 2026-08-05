@@ -15,8 +15,8 @@
 
 import { ScrollMode, SpreadMode } from "./ui_utils.js";
 import { AppOptions } from "./app_options.js";
+import { createPDFViewerApplication } from "./app.js";
 import { LinkTarget } from "./pdf_link_service.js";
-import { PDFViewerApplication } from "./app.js";
 import { RenderingStates } from "./renderable_view.js";
 
 const AppConstants =
@@ -24,6 +24,7 @@ const AppConstants =
     ? { LinkTarget, RenderingStates, ScrollMode, SpreadMode }
     : null;
 
+const PDFViewerApplication = createPDFViewerApplication();
 window.PDFViewerApplication = PDFViewerApplication;
 window.PDFViewerApplicationConstants = AppConstants;
 window.PDFViewerApplicationOptions = AppOptions;

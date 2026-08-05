@@ -20,7 +20,6 @@
 /** @typedef {import("./event_utils").EventBus} EventBus */
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_rendering_queue").PDFRenderingQueue} PDFRenderingQueue */
-/** @typedef {import("./comment_manager.js").CommentManager} CommentManager */
 /** @typedef {import("./l10n.js").L10n} L10n */
 
 import {
@@ -39,7 +38,6 @@ import {
   floorToDivide,
   TextLayerMode,
 } from "./ui_utils.js";
-import { AnnotationEditorLayerBuilder } from "./annotation_editor_layer_builder.js";
 import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
 import { AppOptions } from "./app_options.js";
 import { Autolinker } from "./autolinker.js";
@@ -109,8 +107,6 @@ import { XfaLayerBuilder } from "./xfa_layer_builder.js";
  *   the necessary layer-properties.
  * @property {boolean} [enableAutoLinking] - Enable creation of hyperlinks from
  *   text that look like URLs. The default value is `true`.
- * @property {CommentManager} [commentManager] - The comment manager instance.
- *   to.
  * @property {AbortSignal} [abortSignal]
  */
 
@@ -118,7 +114,6 @@ const DEFAULT_LAYER_PROPERTIES =
   typeof PDFJSDev === "undefined" || !PDFJSDev.test("COMPONENTS")
     ? null
     : {
-        annotationEditorUIManager: null,
         annotationStorage: null,
         downloadManager: null,
         enableScripting: false,
@@ -144,8 +139,6 @@ class PDFPageView extends BasePDFPageView {
   #annotationMode = AnnotationMode.ENABLE_FORMS;
 
   #canvasWrapper = null;
-
-  #commentManager = null;
 
   #enableAutoLinking = true;
 
@@ -208,7 +201,6 @@ class PDFPageView extends BasePDFPageView {
     this.capCanvasAreaFactor =
       options.capCanvasAreaFactor ?? AppOptions.get("capCanvasAreaFactor");
     this.#enableAutoLinking = options.enableAutoLinking !== false;
-    this.#commentManager = options.commentManager || null;
 
     this.l10n = options.l10n;
     if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
@@ -303,7 +295,6 @@ class PDFPageView extends BasePDFPageView {
       maxCanvasDim: this.maxCanvasDim,
       capCanvasAreaFactor: this.capCanvasAreaFactor,
       enableAutoLinking: this.#enableAutoLinking,
-      commentManager: this.#commentManager,
       l10n: this.l10n,
     });
     clone.setPdfPage(this.pdfPage.clone(id - 1));
@@ -375,12 +366,6 @@ class PDFPageView extends BasePDFPageView {
     }
     // Don't update the page index for the draw layer, since it's just used as
     // an identifier.
-
-    // Page mutations clear the editor layer map; restore unchanged pages too.
-    this.#layerProperties.annotationEditorUIManager?.updatePageIndex(
-      oldPageNumber - 1,
-      newPageNumber - 1
-    );
   }
 
   setPdfPage(pdfPage) {
@@ -434,7 +419,6 @@ class PDFPageView extends BasePDFPageView {
       return;
     }
     this.destroy();
-    this.#layerProperties.annotationEditorUIManager?.deletePage(this.id);
   }
 
   hasEditableAnnotations() {
@@ -496,6 +480,9 @@ class PDFPageView extends BasePDFPageView {
   }
 
   async #renderAnnotationEditorLayer() {
+    if (!this.annotationEditorLayer) {
+      return;
+    }
     let error = null;
     try {
       await this.annotationEditorLayer.render({
@@ -511,6 +498,9 @@ class PDFPageView extends BasePDFPageView {
   }
 
   async #renderDrawLayer() {
+    if (!this.drawLayer) {
+      return;
+    }
     try {
       await this.drawLayer.render({
         intent: "display",
@@ -1059,7 +1049,7 @@ class PDFPageView extends BasePDFPageView {
       console.error("Must be in new state before drawing");
       this.reset(); // Ensure that we reset all state to prevent issues.
     }
-    const { div, l10n, pdfPage, viewport } = this;
+    const { div, pdfPage, viewport } = this;
 
     if (!pdfPage) {
       this.renderingState = RenderingStates.FINISHED;
@@ -1102,9 +1092,7 @@ class PDFPageView extends BasePDFPageView {
     ) {
       const {
         annotationStorage,
-        annotationEditorUIManager,
         downloadManager,
-        enableComment,
         enableScripting,
         fieldObjectsPromise,
         hasJSActionsPromise,
@@ -1119,14 +1107,11 @@ class PDFPageView extends BasePDFPageView {
         renderForms: this.#annotationMode === AnnotationMode.ENABLE_FORMS,
         linkService,
         downloadManager,
-        enableComment,
         enableScripting,
         hasJSActionsPromise,
         fieldObjectsPromise,
         annotationCanvasMap: this._annotationCanvasMap,
         accessibilityManager: this._accessibilityManager,
-        annotationEditorUIManager,
-        commentManager: this.#commentManager,
         onAppend: annotationLayerDiv => {
           this.#addLayer(annotationLayerDiv, "annotationLayer");
         },
@@ -1226,31 +1211,6 @@ class PDFPageView extends BasePDFPageView {
       });
       await this.#renderDrawLayer();
       this.drawLayer.setParent(canvasWrapper);
-
-      const { annotationEditorUIManager } = this.#layerProperties;
-
-      if (!annotationEditorUIManager) {
-        return;
-      }
-      if (
-        this.annotationLayer ||
-        this.#annotationMode === AnnotationMode.DISABLE
-      ) {
-        this.annotationEditorLayer ||= new AnnotationEditorLayerBuilder({
-          uiManager: annotationEditorUIManager,
-          pageIndex: this.id - 1,
-          l10n,
-          structTreeLayer: this.structTreeLayer,
-          accessibilityManager: this._accessibilityManager,
-          annotationLayer: this.annotationLayer?.annotationLayer,
-          textLayer: this.textLayer,
-          drawLayer: this.drawLayer.getDrawLayer(),
-          onAppend: annotationEditorLayerDiv => {
-            this.#addLayer(annotationEditorLayerDiv, "annotationEditorLayer");
-          },
-        });
-        this.#renderAnnotationEditorLayer();
-      }
     });
 
     if (pdfPage.isPureXfa) {
