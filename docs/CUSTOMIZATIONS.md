@@ -275,6 +275,37 @@ public 目录即可）。
 | 启动开发服务器 | `npx gulp server` |
 | 代码检查 | `npx gulp lint` |
 
+## 兼容性与修复记录
+
+### 旧浏览器 API polyfill（src/shared/util.js）
+
+针对旧版 Edge/Chrome 等不支持新 ES 内置 API 的浏览器，添加了以下 polyfill
+（仅当浏览器缺失对应 API 时生效，不影响现代浏览器的原生实现）：
+
+- `Map.prototype.getOrInsert` / `Map.prototype.getOrInsertComputed`
+- `Math.sumPrecise`：按 Shewchuk 非重叠 expansion 精确累加，避免浮点
+  累加精度损失；符合规范（空列表返回 `-0`、`NaN` 传播、非数字元素抛
+  `TypeError`），如 `Math.sumPrecise([1e20, 0.1, -1e20])` 返回 `0.1`。
+
+### 视图选择按钮图标同步（web/views_manager.js / views_manager.css）
+
+- 视图选择按钮（`#viewsManagerSelectorButton`）新增 `data-view` 属性，
+  随当前视图（缩略图 / 大纲 / 附件 / 图层）同步更新；
+- 按钮图标通过 `&[data-view=...]::before` 与菜单选中项使用同一组图标
+  变量（`--menuitem-*View-icon`），保证按钮图标与
+  `#viewsManagerSelectorOptions .selected::before` 始终一致。
+
+### 缩放下拉框圆角（web/viewer.css）
+
+- `#scaleSelect` 增加 `border-radius: var(--field-border-radius)`，
+  与工具栏输入框等控件的圆角统一。
+
+### 文本选区高亮兼容（web/text_layer_builder.css）
+
+- `::selection` 背景使用 `color-mix(in srgb, AccentColor, transparent 50%)`
+  跟随系统强调色；对不支持 `color-mix()` 的旧浏览器，通过 `@supports`
+  降级为固定色 `rgb(0 120 215 / 0.5)`。
+
 ## 回归测试建议
 
 - 打开多页 PDF：缩略图正常渲染、可点击跳页、无复选框与底部管理栏

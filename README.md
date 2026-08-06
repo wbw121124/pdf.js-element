@@ -23,6 +23,14 @@
 
 详细说明见 [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md)。
 
+## 浏览器兼容性
+
+针对不支持 ES2026/ES2027 新 API 的旧版浏览器（如较旧版本的 Edge/Chrome），
+在 `src/shared/util.js` 中内置了以下 polyfill（仅当浏览器缺失对应 API 时生效）：
+
+- `Map.prototype.getOrInsert` / `Map.prototype.getOrInsertComputed`
+- `Math.sumPrecise`（Shewchuk 精确求和算法）
+
 ## 环境要求
 
 - Node.js（建议 LTS 版本，>= 18）

@@ -70,6 +70,13 @@ const UI_NOTIFICATION_CLASS = "pdfSidebarNotification";
 class ViewsManager extends Sidebar {
   static #l10nDescription = null;
 
+  static #viewNames = {
+    [SidebarView.THUMBS]: "thumbnails",
+    [SidebarView.OUTLINE]: "outlines",
+    [SidebarView.ATTACHMENTS]: "attachments",
+    [SidebarView.LAYERS]: "layers",
+  };
+
   #hasAnimations = !window.matchMedia("(prefers-reduced-motion: reduce)")
     .matches;
 
@@ -138,6 +145,10 @@ class ViewsManager extends Sidebar {
 
     this.viewsManagerCurrentOutlineButton = viewsManagerCurrentOutlineButton;
     this.viewsManagerHeaderLabel = viewsManagerHeaderLabel;
+    this.viewsManagerSelectorButton = viewsManagerSelectorButton;
+
+    this.viewsManagerSelectorButton.dataset.view =
+      ViewsManager.#viewNames[this.active];
 
     this.eventBus = eventBus;
 
@@ -260,6 +271,10 @@ class ViewsManager extends Sidebar {
     // Update the active view *after* it has been validated above,
     // in order to prevent setting it to an invalid state.
     this.active = view;
+
+    // Update the selector-button icon, so that it matches the active view.
+    this.viewsManagerSelectorButton.dataset.view =
+      ViewsManager.#viewNames[view];
 
     // Update the CSS classes (and aria attributes), for all buttons and views.
     toggleSelectedBtn(

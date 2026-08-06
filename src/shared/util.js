@@ -1139,6 +1139,84 @@ if (typeof Iterator.prototype.join !== "function") {
   };
 }
 
+// TODO: Remove this once `Map.prototype.getOrInsert` is generally available.
+if (typeof Map.prototype.getOrInsert !== "function") {
+  // eslint-disable-next-line no-extend-native
+  Map.prototype.getOrInsert = function (key, value) {
+    if (this.has(key)) {
+      return this.get(key);
+    }
+    this.set(key, value);
+    return value;
+  };
+}
+
+// TODO: Remove this once `Map.prototype.getOrInsertComputed` is generally
+// available.
+if (typeof Map.prototype.getOrInsertComputed !== "function") {
+  // eslint-disable-next-line no-extend-native
+  Map.prototype.getOrInsertComputed = function (key, callbackfn) {
+    if (typeof callbackfn !== "function") {
+      throw new TypeError(
+        "Map.prototype.getOrInsertComputed requires a callback function."
+      );
+    }
+    if (this.has(key)) {
+      return this.get(key);
+    }
+    const value = callbackfn(key);
+    this.set(key, value);
+    return value;
+  };
+}
+
+// TODO: Remove this once `Math.sumPrecise` is generally available.
+if (typeof Math.sumPrecise !== "function") {
+  Math.sumPrecise = function (items) {
+    let sum = 0;
+    let minusZero = true;
+    // An exact, non-overlapping "expansion" of the partial sums (Shewchuk),
+    // to avoid the floating point precision loss of a naive summation.
+    let expansion = [];
+
+    for (const n of items) {
+      if (typeof n !== "number") {
+        throw new TypeError("Math.sumPrecise: all values must be numbers.");
+      }
+      if (Number.isNaN(n)) {
+        return NaN;
+      }
+      if (n === 0) {
+        minusZero = Object.is(n, -0);
+        continue;
+      }
+      const out = [];
+      let q = n;
+      for (let i = 0; i < expansion.length; i++) {
+        const a = expansion[i];
+        const s = a + q;
+        const bv = s - a;
+        const err = a - (s - bv) + (q - bv);
+        q = s;
+        if (err !== 0) {
+          out.push(err);
+        }
+      }
+      out.push(q);
+      expansion = out;
+    }
+    // The components of the expansion are non-overlapping, hence summing them
+    // from the largest to the smallest yields the correctly rounded result.
+    for (let i = expansion.length - 1; i >= 0; i--) {
+      sum += expansion[i];
+    }
+    if (sum === 0) {
+      return minusZero ? -0 : 0;
+    }
+    return sum;
+  };
+}
+
 export {
   _isValidExplicitDest,
   AbortException,

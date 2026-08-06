@@ -325,6 +325,22 @@
             background-color: var(--button-fg);
           }
 
+          &[data-view="thumbnails"]::before {
+            mask-image: var(--views-manager-button-icon);
+          }
+
+          &[data-view="outlines"]::before {
+            mask-image: var(--menuitem-outlinesView-icon);
+          }
+
+          &[data-view="attachments"]::before {
+            mask-image: var(--menuitem-attachmentsView-icon);
+          }
+
+          &[data-view="layers"]::before {
+            mask-image: var(--menuitem-layersView-icon);
+          }
+
           &::after {
             content: "";
             display: inline-block;
