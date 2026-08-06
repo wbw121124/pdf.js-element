@@ -1442,14 +1442,8 @@ class Driver {
   }
 
   _log(message) {
-    // Using insertAdjacentHTML yields a large performance gain and
-    // reduces runtime significantly.
-    if (this.output.insertAdjacentHTML) {
-      // eslint-disable-next-line no-unsanitized/method
-      this.output.insertAdjacentHTML("BeforeEnd", message);
-    } else {
-      this.output.textContent += message;
-    }
+    // Append as plain text to avoid interpreting untrusted content as HTML.
+    this.output.textContent += message;
 
     if (message.includes("\n") && !this.disableScrolling.checked) {
       // Scroll to the bottom of the page
