@@ -3421,6 +3421,8 @@ gulp.task(
     "image_decoders-legacy",
     "minified",
     "minified-legacy",
+    "element",
+    "vue-components",
     "types",
     function createDist() {
       fs.rmSync(DIST_DIR, { recursive: true, force: true });
