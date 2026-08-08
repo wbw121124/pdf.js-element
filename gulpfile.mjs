@@ -165,11 +165,11 @@ function safeSpawnSync(command, parameters, options = {}) {
   if (result.status !== 0) {
     console.log(
       'Error: command "' +
-        command +
-        '" with parameters "' +
-        parameters +
-        '" exited with code ' +
-        result.status
+      command +
+      '" with parameters "' +
+      parameters +
+      '" exited with code ' +
+      result.status
     );
     process.exit(result.status);
   }
@@ -406,23 +406,23 @@ function createWebpackConfig(
       minimizer: !isMinified
         ? undefined
         : [
-            new TerserPlugin({
-              extractComments: false,
-              parallel: false,
-              terserOptions: {
-                compress: {
-                  // V8 chokes on very long sequences, work around that.
-                  sequences: false,
-                },
-                format: {
-                  comments: /@lic|webpackIgnore|@vite-ignore|pdfjsVersion/i,
-                },
-                keep_classnames: true,
-                keep_fnames: true,
-                module: isModule,
+          new TerserPlugin({
+            extractComments: false,
+            parallel: false,
+            terserOptions: {
+              compress: {
+                // V8 chokes on very long sequences, work around that.
+                sequences: false,
               },
-            }),
-          ],
+              format: {
+                comments: /@lic|webpackIgnore|@vite-ignore|pdfjsVersion/i,
+              },
+              keep_classnames: true,
+              keep_fnames: true,
+              module: isModule,
+            },
+          }),
+        ],
     },
     experiments,
     output,
@@ -986,7 +986,7 @@ function resolveCodeTestIds() {
     if (missing.length) {
       console.log(
         `\n### Ignoring ${missing.length} covered test(s) not in the manifest:\n` +
-          missing.map(id => `  ${id}`).join("\n")
+        missing.map(id => `  ${id}`).join("\n")
       );
       testIds = testIds.filter(id => knownIds.has(id));
     }
@@ -997,7 +997,7 @@ function resolveCodeTestIds() {
   } else {
     console.log(
       `\n### Found ${testIds.length} test(s) covering "${codeArg}":\n` +
-        testIds.map(id => `  ${id}`).join("\n")
+      testIds.map(id => `  ${id}`).join("\n")
     );
   }
   return testIds;
@@ -1443,8 +1443,8 @@ function scopeCSSForElement() {
       }
       const prefix =
         top === rule &&
-        selector.includes("#") &&
-        !/^\s*\.pdfjs-element\b/.test(selector)
+          selector.includes("#") &&
+          !/^\s*\.pdfjs-element\b/.test(selector)
           ? `${rootSelector} `
           : "";
       rule.selectors = selector
@@ -1574,7 +1574,7 @@ async function createElementTemplate(defines) {
   if (!bodyMatch) {
     throw new Error(
       "Unable to find the viewer body in `web/viewer.html`; " +
-        "cannot generate `element/viewer_template.js`."
+      "cannot generate `element/viewer_template.js`."
     );
   }
   const bodyHtml = bodyMatch[1].replace(/^\r?\n/, "").trimEnd();
@@ -3221,7 +3221,7 @@ gulp.task(
       });
       await server.listen();
       server.printUrls();
-      await new Promise(() => {});
+      await new Promise(() => { });
     }
   )
 );
@@ -3447,6 +3447,7 @@ gulp.task(
     "minified",
     "minified-legacy",
     "element",
+    "element-legacy",
     "vue-components",
     "types",
     function createDist() {
@@ -3652,8 +3653,8 @@ gulp.task(
             .on("end", function () {
               console.log(
                 "Result diff can be found at " +
-                  BUILD_DIR +
-                  MOZCENTRAL_DIFF_FILE
+                BUILD_DIR +
+                MOZCENTRAL_DIFF_FILE
               );
               done();
             });
