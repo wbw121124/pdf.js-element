@@ -381,7 +381,6 @@ function createViewerApp({
       initialBookmark: "",
       isViewerEmbedded: true,
       isViewerElement: true,
-      viewHistoryPrefix: idPrefix,
     });
     app = instance;
 

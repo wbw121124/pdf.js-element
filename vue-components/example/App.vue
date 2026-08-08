@@ -42,7 +42,7 @@ export default {
   <div class="app">
     <h1>&lt;pdf-viewer-element&gt; · Vue 3</h1>
     <p class="hint">
-      将 <code>build/generic/element/</code> 目录（worker、locale、cmaps 等）
+      将 <code>build/element/</code> 目录（worker、locale、cmaps 等）
       复制到 Vite 的 public 目录，使资源可通过
       <code>/element/...</code> 访问。
     </p>

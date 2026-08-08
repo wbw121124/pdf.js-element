@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import "../build/generic/element/pdf-viewer-element.css";
+import "../build/element/pdf-viewer-element.css";
 import { createViewerApp } from "../build/vue-components/pdf-viewer-app.mjs";
 
 const FORWARDED_EVENTS = [

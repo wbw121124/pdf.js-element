@@ -167,17 +167,18 @@ VSCode Dark Plus 配色，并默认启用深色。
 - 源码位于 `element/`：`pdf-viewer-element.js`（元素实现）、
   `viewer_template.js`（查看器 DOM 模板，**由 `gulp element` 从
   `web/viewer.html` 自动生成**）、`demo.html`（双实例演示页）。
-- 构建命令：`npx gulp element`，产物输出到 `build/generic/element/`：
+- 构建命令：`npx gulp element`（旧版浏览器用 `npx gulp element-legacy`），
+  产物输出到 `build/element/`（legacy 为 `build/element-legacy/`）：
   - `pdf-viewer-element.mjs` — 元素 bundle（自包含 PDF.js 库，无需
     `globalThis.pdfjsLib` 垫片，通过 webpack alias 直接引用 `src/pdf.js`）
   - `pdf-viewer-element.css` — 作用域化查看器 CSS（见下文）
   - `pdf.worker.mjs` / `pdf.sandbox.mjs` 及 `cmaps/`、`iccs/`、
     `standard_fonts/`、`wasm/`、`images/` 等运行资源
   - `demo.html` — 演示页
-- 演示：把 `build/generic/element/` 部署到静态服务器后访问 `demo.html`；
+- 演示：把 `build/element/` 部署到静态服务器后访问 `demo.html`；
   开发时启动 `gulp server` 后直接访问
   `http://localhost:8888/element/demo.html`（服务器将该路径映射到
-  `build/generic/element/`，见 `gulpfile.mjs` 的 `server` 任务与
+  `build/element/`，见 `gulpfile.mjs` 的 `server` 任务与
   `test/webserver.mjs` 的 `aliases` 选项）；修改 `element/`、
   `web/viewer.html`、`web/viewer.css` 会自动触发重建。
 
@@ -196,11 +197,13 @@ VSCode Dark Plus 配色，并默认启用深色。
   的 `inset-inline-start` 恒为 0）；`--viewer-container-height` 与
   `--viewsManager-width` 等变量按实例写入各自 `.pdfjs-element` 根元素。
 - 嵌入行为：`app.js` 中新增 `isViewerElement` 分支，避免修改宿主页面的
-  `html` 样式/`dir` 属性；视图历史通过 `viewHistoryPrefix` 按实例隔离。
+  `html` 样式/`dir` 属性。
+- 无视图历史缓存：本分支已移除 `ViewHistory` 机制（不再通过
+  localStorage 缓存/恢复页面位置、缩放等视图参数）。
 - 属性：`src`、`page`、`zoom`，以及资源覆盖属性（`worker-src`、
   `c-map-url`、`standard-font-data-url`、`wasm-url`、`sandbox-bundle-src`）。
 - 语言：`lang` 指定界面语言（如 `zh-CN`），`l10n-url` 指定语言文件目录
-  （需含 `locale.json` 与 `*.ftl`）；构建产物 `build/generic/element/locale/`
+  （需含 `locale.json` 与 `*.ftl`）；构建产物 `build/element/locale/`
   已内置 `en-US` 与 `zh-CN`，演示页将 `l10n-url` 指向 `locale/` 即可使用。
   注意：同一页面只能使用一个语言目录（以第一个设置 `l10n-url` 的元素为准）。
 - 方法：`open` / `close` / `nextPage` / `previousPage` / `firstPage` /
@@ -261,7 +264,7 @@ VSCode Dark Plus 配色，并默认启用深色。
   `element/` 查看器资源），可直接静态托管。
 
 查看器资源（worker、locale、cmaps 等）需自行托管，可参考
-`vue-components/example/` 中的示例（将 `build/generic/element/` 复制到
+`vue-components/example/` 中的示例（将 `build/element/` 复制到
 public 目录即可）。
 
 ## 构建命令备忘

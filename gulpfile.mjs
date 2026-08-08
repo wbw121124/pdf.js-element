@@ -65,7 +65,8 @@ const TEST_DIR = "test/";
 const BASELINE_DIR = BUILD_DIR + "baseline/";
 const MOZCENTRAL_BASELINE_DIR = BUILD_DIR + "mozcentral.baseline/";
 const GENERIC_DIR = BUILD_DIR + "generic/";
-const ELEMENT_DIR = BUILD_DIR + "generic/element/";
+const ELEMENT_DIR = BUILD_DIR + "element/";
+const ELEMENT_LEGACY_DIR = BUILD_DIR + "element-legacy/";
 const GENERIC_LEGACY_DIR = BUILD_DIR + "generic-legacy/";
 const COMPONENTS_DIR = BUILD_DIR + "components/";
 const COMPONENTS_LEGACY_DIR = BUILD_DIR + "components-legacy/";
@@ -1697,6 +1698,30 @@ gulp.task(
   )
 );
 
+// Builds the `<pdf-viewer-element>` Custom Element with support for older
+// browsers (legacy), i.e. with Babel transpilation enabled.
+gulp.task(
+  "element-legacy",
+  gulp.series(
+    createBuildNumber,
+    "locale",
+    function scriptingElementLegacy() {
+      const defines = { ...DEFINES, GENERIC: true, SKIP_BABEL: false };
+      return createTemporaryScriptingBundle(defines);
+    },
+    function elementTemplateLegacy() {
+      const defines = { ...DEFINES, GENERIC: true, SKIP_BABEL: false };
+      return createElementTemplate(defines);
+    },
+    function createElementLegacy() {
+      console.log("\n### Creating element (legacy)");
+      const defines = { ...DEFINES, GENERIC: true, SKIP_BABEL: false };
+
+      return buildElement(defines, ELEMENT_LEGACY_DIR);
+    }
+  )
+);
+
 // Builds the application factory used by the Vue 3 wrapper component (see
 // `vue-components/pdf_viewer_app.js`); unlike the Custom Element bundle it
 // contains no Web Components / Custom Element machinery.
@@ -3139,7 +3164,7 @@ gulp.task(
         port,
         // Serve the `<pdf-viewer-element>` demo (built by `gulp element`)
         // under a stable URL, without having to reference the `build/` dir.
-        aliases: { "/element/": "build/generic/element/" },
+        aliases: { "/element/": "build/element/" },
       });
       server.start();
     }
@@ -3191,7 +3216,7 @@ gulp.task(
         plugins: [vuePlugin()],
         // Serve the `<pdf-viewer-element>` build output under the same
         // `/element/` URL that the example references (see `App.vue`).
-        publicDir: path.join(__dirname, BUILD_DIR, "generic"),
+        publicDir: path.join(__dirname, BUILD_DIR),
         server: { host, port, strictPort: true },
       });
       await server.listen();

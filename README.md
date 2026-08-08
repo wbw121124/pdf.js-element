@@ -82,8 +82,8 @@ npx gulp dist
 npx gulp element
 ```
 
-输出位于 `build/generic/element/`，演示页为
-`build/generic/element/demo.html`（同一页面可嵌入多个独立实例）。
+输出位于 `build/element/`，演示页为
+`build/element/demo.html`（同一页面可嵌入多个独立实例）。
 源码见 `element/`，使用说明见 [docs/CUSTOMIZATIONS.md](docs/CUSTOMIZATIONS.md)。
 
 ### 其他构建目标

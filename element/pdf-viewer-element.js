@@ -235,7 +235,6 @@ class PDFViewerElement extends HTMLElement {
       initialBookmark: "",
       isViewerEmbedded: true,
       isViewerElement: true,
-      viewHistoryPrefix: this.#idPrefix,
     });
     this.#app = app;
 

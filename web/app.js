@@ -82,7 +82,6 @@ import { Preferences } from "web-preferences";
 import { RenderingStates } from "./renderable_view.js";
 import { SecondaryToolbar } from "web-secondary_toolbar";
 import { Toolbar } from "web-toolbar";
-import { ViewHistory } from "./view_history.js";
 import { ViewsManager } from "web-views_manager";
 
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
@@ -107,12 +106,6 @@ const ViewOnLoad = {
 function createPDFViewerApplication(options = {}) {
   const PDFViewerApplication = {
     initialBookmark: document.location.hash.substring(1),
-    /**
-     * Prefix for the `ViewHistory` storage key, which allows multiple
-     * instances (e.g. `<pdf-viewer-element>` elements on the same page) to
-     * keep independent view-history entries.
-     */
-    viewHistoryPrefix: options.viewHistoryPrefix ?? "",
     _initializedCapability: {
       ...Promise.withResolvers(),
       settled: false,
@@ -150,8 +143,6 @@ function createPDFViewerApplication(options = {}) {
     pdfCursorTools: null,
     /** @type {PDFScriptingManager} */
     pdfScriptingManager: null,
-    /** @type {ViewHistory} */
-    store: null,
     /** @type {OverlayManager} */
     overlayManager: null,
     /** @type {Preferences} */
@@ -1086,7 +1077,6 @@ function createPDFViewerApplication(options = {}) {
         this.pdfDocumentProperties?.setDocument(null);
       }
       this.pdfLinkService.externalLinkEnabled = true;
-      this.store = null;
       this.isInitialViewSet = false;
       this.url = "";
       this.baseUrl = "";
@@ -1320,126 +1310,88 @@ function createPDFViewerApplication(options = {}) {
 
       this.pdfThumbnailViewer?.setDocument(pdfDocument);
 
-      const storedPromise = (this.store = new ViewHistory(
-        this.viewHistoryPrefix + pdfDocument.fingerprints[0]
-      ))
-        .getMultiple({
-          page: null,
-          zoom: DEFAULT_SCALE_VALUE,
-          scrollLeft: "0",
-          scrollTop: "0",
-          rotation: null,
-          sidebarView: SidebarView.UNKNOWN,
-          scrollMode: ScrollMode.UNKNOWN,
-          spreadMode: SpreadMode.UNKNOWN,
-        })
-        .catch(() => {
-          /* Unable to read from storage; ignoring errors. */
-        });
-
       firstPagePromise.then(pdfPage => {
         this.loadingBar?.setWidth(this.appConfig.viewerContainer);
         this._initializeAnnotationStorageCallbacks(pdfDocument);
 
         Promise.all([
           animationStarted,
-          storedPromise,
           pageLayoutPromise,
           pageModePromise,
           openActionPromise,
         ])
-          .then(
-            async ([timeStamp, stored, pageLayout, pageMode, openAction]) => {
-              const viewOnLoad = AppOptions.get("viewOnLoad");
+          .then(async ([timeStamp, pageLayout, pageMode, openAction]) => {
+            const viewOnLoad = AppOptions.get("viewOnLoad");
 
-              this._initializePdfHistory({
-                fingerprint: pdfDocument.fingerprints[0],
-                viewOnLoad,
-                initialDest: openAction?.get("dest"),
-              });
-              const initialBookmark = this.initialBookmark;
+            this._initializePdfHistory({
+              fingerprint: pdfDocument.fingerprints[0],
+              viewOnLoad,
+              initialDest: openAction?.get("dest"),
+            });
+            const initialBookmark = this.initialBookmark;
 
-              // Initialize the default values, from user preferences.
-              const zoom = AppOptions.get("defaultZoomValue");
-              let hash = zoom ? `zoom=${zoom}` : null;
+            // Initialize the default values, from user preferences.
+            const zoom = AppOptions.get("defaultZoomValue");
+            const hash = zoom ? `zoom=${zoom}` : null;
 
-              let rotation = null;
-              let sidebarView = AppOptions.get("sidebarViewOnLoad");
-              let scrollMode = AppOptions.get("scrollModeOnLoad");
-              let spreadMode = AppOptions.get("spreadModeOnLoad");
+            const rotation = null;
+            let sidebarView = AppOptions.get("sidebarViewOnLoad");
+            const scrollMode = AppOptions.get("scrollModeOnLoad");
+            let spreadMode = AppOptions.get("spreadModeOnLoad");
 
-              if (stored?.page && viewOnLoad !== ViewOnLoad.INITIAL) {
-                hash =
-                  `page=${stored.page}&zoom=${zoom || stored.zoom},` +
-                  `${stored.scrollLeft},${stored.scrollTop}`;
-
-                rotation = parseInt(stored.rotation, 10);
-                // Always let user preference take precedence over the
-                // view history.
-                if (sidebarView === SidebarView.UNKNOWN) {
-                  sidebarView = stored.sidebarView | 0;
-                }
-                if (scrollMode === ScrollMode.UNKNOWN) {
-                  scrollMode = stored.scrollMode | 0;
-                }
-                if (spreadMode === SpreadMode.UNKNOWN) {
-                  spreadMode = stored.spreadMode | 0;
-                }
-              }
-              // Always let the user preference/view history take precedence.
-              if (pageMode && sidebarView === SidebarView.UNKNOWN) {
-                sidebarView = apiPageModeToSidebarView(pageMode);
-              }
-              if (
-                pageLayout &&
-                scrollMode === ScrollMode.UNKNOWN &&
-                spreadMode === SpreadMode.UNKNOWN
-              ) {
-                const modes = apiPageLayoutToViewerModes(pageLayout);
-                // TODO: Try to improve page-switching when using
-                // the mouse-wheel
-                // and/or arrow-keys before allowing the document to
-                // control this.
-                // scrollMode = modes.scrollMode;
-                spreadMode = modes.spreadMode;
-              }
-
-              this.setInitialView(hash, {
-                rotation,
-                sidebarView,
-                scrollMode,
-                spreadMode,
-              });
-              this.eventBus.dispatch("documentinit", { source: this });
-
-              // For documents with different page sizes, once all pages are
-              // resolved, ensure that the correct location becomes visible
-              // on load.
-              // (To reduce the risk, in very large and/or slow loading
-              // documents,
-              //  that the location changes *after* the user has started
-              //  interacting
-              //  with the viewer, wait for either `pagesPromise` or a timeout.)
-              await Promise.race([
-                pagesPromise,
-                new Promise(resolve => {
-                  setTimeout(resolve, FORCE_PAGES_LOADED_TIMEOUT);
-                }),
-              ]);
-              if (!initialBookmark && !hash) {
-                return;
-              }
-              if (pdfViewer.hasEqualPageSizes) {
-                return;
-              }
-              this.initialBookmark = initialBookmark;
-
-              // eslint-disable-next-line no-self-assign
-              pdfViewer.currentScaleValue = pdfViewer.currentScaleValue;
-              // Re-apply the initial document location.
-              this.setInitialView(hash);
+            // Always let the user preference/view history take precedence.
+            if (pageMode && sidebarView === SidebarView.UNKNOWN) {
+              sidebarView = apiPageModeToSidebarView(pageMode);
             }
-          )
+            if (
+              pageLayout &&
+              scrollMode === ScrollMode.UNKNOWN &&
+              spreadMode === SpreadMode.UNKNOWN
+            ) {
+              const modes = apiPageLayoutToViewerModes(pageLayout);
+              // TODO: Try to improve page-switching when using
+              // the mouse-wheel
+              // and/or arrow-keys before allowing the document to
+              // control this.
+              // scrollMode = modes.scrollMode;
+              spreadMode = modes.spreadMode;
+            }
+
+            this.setInitialView(hash, {
+              rotation,
+              sidebarView,
+              scrollMode,
+              spreadMode,
+            });
+            this.eventBus.dispatch("documentinit", { source: this });
+
+            // For documents with different page sizes, once all pages are
+            // resolved, ensure that the correct location becomes visible
+            // on load.
+            // (To reduce the risk, in very large and/or slow loading
+            // documents,
+            //  that the location changes *after* the user has started
+            //  interacting
+            //  with the viewer, wait for either `pagesPromise` or a timeout.)
+            await Promise.race([
+              pagesPromise,
+              new Promise(resolve => {
+                setTimeout(resolve, FORCE_PAGES_LOADED_TIMEOUT);
+              }),
+            ]);
+            if (!initialBookmark && !hash) {
+              return;
+            }
+            if (pdfViewer.hasEqualPageSizes) {
+              return;
+            }
+            this.initialBookmark = initialBookmark;
+
+            // eslint-disable-next-line no-self-assign
+            pdfViewer.currentScaleValue = pdfViewer.currentScaleValue;
+            // Re-apply the initial document location.
+            this.setInitialView(hash);
+          })
           .catch(() => {
             // Ensure that the document is always completely initialized,
             // even if there are any errors thrown above.
@@ -1868,18 +1820,8 @@ function createPDFViewerApplication(options = {}) {
         opts
       );
       eventBus.on(
-        "scrollmodechanged",
-        onViewerModesChanged.bind(this, "scrollMode"),
-        opts
-      );
-      eventBus.on(
         "switchspreadmode",
         evt => (pdfViewer.spreadMode = evt.mode),
-        opts
-      );
-      eventBus.on(
-        "spreadmodechanged",
-        onViewerModesChanged.bind(this, "spreadMode"),
         opts
       );
       eventBus.on(
@@ -2305,42 +2247,12 @@ function onNamedAction(evt) {
 
 function onSidebarViewChanged({ view }) {
   this.pdfRenderingQueue.isThumbnailViewEnabled = view === SidebarView.THUMBS;
-
-  if (this.isInitialViewSet) {
-    // Only update the storage when the document has been loaded *and* rendered.
-    this.store?.set("sidebarView", view).catch(() => {
-      // Unable to write to storage.
-    });
-  }
 }
 
 function onUpdateViewarea({ location }) {
-  if (this.isInitialViewSet) {
-    // Only update the storage when the document has been loaded *and* rendered.
-    this.store
-      ?.setMultiple({
-        page: location.pageNumber,
-        zoom: location.scale,
-        scrollLeft: location.left,
-        scrollTop: location.top,
-        rotation: location.rotation,
-      })
-      .catch(() => {
-        // Unable to write to storage.
-      });
-  }
   if (this.appConfig.secondaryToolbar) {
     this.appConfig.secondaryToolbar.viewBookmarkButton.href =
       this.pdfLinkService.getAnchorUrl(location.pdfOpenParams);
-  }
-}
-
-function onViewerModesChanged(name, evt) {
-  if (this.isInitialViewSet && !this.pdfViewer.isInPresentationMode) {
-    // Only update the storage when the document has been loaded *and* rendered.
-    this.store?.set(name, evt.mode).catch(() => {
-      // Unable to write to storage.
-    });
   }
 }
 
